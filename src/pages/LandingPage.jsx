@@ -83,7 +83,7 @@ export function LandingPage({ onEnterApp }) {
             Agent Sign In
           </button>
           <button
-            onClick={onEnterApp}
+            onClick={() => { setShowAuthModal(true); setIsLogin(true) }}
             className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center gap-2 cursor-pointer"
           >
             <span>Enter TMA Command Center</span>
@@ -114,14 +114,14 @@ export function LandingPage({ onEnterApp }) {
 
         <div className="flex items-center justify-center gap-4 pt-4">
           <button
-            onClick={onEnterApp}
+            onClick={() => { setShowAuthModal(true); setIsLogin(true) }}
             className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm rounded-xl shadow-[0_0_30px_rgba(245,158,11,0.5)] transition-all flex items-center gap-3 transform hover:scale-105 cursor-pointer"
           >
             <Play className="w-5 h-5 fill-current" />
             <span>LAUNCH MADAME MINUTE APP</span>
           </button>
           <button
-            onClick={() => setShowAuthModal(true)}
+            onClick={() => { setShowAuthModal(true); setIsLogin(false) }}
             className="px-6 py-4 bg-zinc-900 border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 font-bold text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer"
           >
             <Lock className="w-4 h-4" />
