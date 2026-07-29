@@ -135,6 +135,14 @@ export const useTimesheetStore = create(
       },
 
       addEntry: async (newEntry, userId = null) => {
+        // Access current user details from auth store
+        const authUser = window.__useAuthStore ? window.__useAuthStore.getState()?.user : null
+        const uid = userId || authUser?.uid
+        const email = authUser?.email || ''
+        const name = (authUser?.displayName && authUser.displayName !== 'Agent User' && authUser.displayName !== 'TMA Agent')
+          ? authUser.displayName
+          : (email ? email.split('@')[0] : '')
+
         const id = 'tma-entry-' + Date.now()
         const computedHours = (newEntry.startTime && newEntry.endTime && !newEntry.isHoliday)
           ? calculateHours(newEntry.startTime, newEntry.endTime, newEntry.breakMinutes || 0)
@@ -145,14 +153,17 @@ export const useTimesheetStore = create(
           date: dayjs().format('YYYY-MM-DD'),
           status: 'Completed',
           createdAt: new Date().toISOString(),
+          userId: uid,
+          userEmail: email,
+          userName: name,
           ...newEntry,
           hours: computedHours
         })
 
         set(state => ({ entries: [entryToAdd, ...state.entries] }))
 
-        if (userId) {
-          const docId = await firestoreService.addTimesheet(userId, entryToAdd)
+        if (uid) {
+          const docId = await firestoreService.addTimesheet(uid, entryToAdd)
           if (docId) {
             set(state => ({
               entries: state.entries.map(e => e.id === id ? { ...e, docId } : e)

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Activity, Eye, Shield, Users } from 'lucide-react'
 import { useTimesheetStore } from '../../store/useTimesheetStore'
-import { useAuthStore } from '../../store/useAuthStore'
+import { useAuthStore, getLocalRegisteredUsers } from '../../store/useAuthStore'
 import { formatHours } from '../../utils/dateUtils'
 import dayjs from 'dayjs'
 
@@ -16,27 +16,60 @@ export function TvaSacredTimelineMonitor({ onSelectAgent }) {
   // Use real entries pool (allEntries if available, else current entries)
   const sourceEntries = allEntries.length > 0 ? allEntries : entries
 
-  // Build real user list dynamically from store or unique entries
+  // Build real user list dynamically from registered accounts + Firestore users
   const userMap = new Map()
 
   // Always include current logged-in user
   if (user) {
+    const adminName = (user.displayName && user.displayName !== 'Agent User' && user.displayName !== 'TMA Agent')
+      ? user.displayName
+      : (user.email ? user.email.split('@')[0] : 'Admin User')
+
     userMap.set(user.uid || user.email, {
       id: user.uid || user.email,
-      name: user.displayName || user.email?.split('@')[0] || 'Admin User',
+      name: adminName,
       email: user.email || 'jeevajeevanandham30@gmail.com',
       role: user.role || 'Master Timeline Commander',
       color: '#F59E0B' // Amber
     })
   }
 
+  // Include local registered users
+  const localUsers = getLocalRegisteredUsers()
+  if (localUsers && localUsers.length > 0) {
+    localUsers.forEach((u) => {
+      if (u.isGuest || u.email === 'agent@tma.org' || !u.email) return
+      const colors = ['#F59E0B', '#3B82F6', '#10B981', '#A855F7', '#F97316', '#EC4899', '#06B6D4']
+      const formattedName = (u.displayName && u.displayName !== 'Agent User' && u.displayName !== 'TMA Agent')
+        ? u.displayName
+        : (u.email ? u.email.split('@')[0] : 'TMA Agent')
+
+      const key = u.uid || u.email
+      if (!userMap.has(key)) {
+        userMap.set(key, {
+          id: key,
+          name: formattedName,
+          email: u.email || '',
+          role: u.role || 'TMA Agent',
+          color: colors[userMap.size % colors.length]
+        })
+      }
+    })
+  }
+
   // Include users from Firestore user collection if available
   if (allUsers && allUsers.length > 0) {
     allUsers.forEach((u, i) => {
+      if (u.isGuest || u.email === 'agent@tma.org' || !u.email) return
       const colors = ['#F59E0B', '#3B82F6', '#10B981', '#A855F7', '#F97316', '#EC4899', '#06B6D4']
-      userMap.set(u.uid || u.email, {
-        id: u.uid || u.email,
-        name: u.displayName || u.email?.split('@')[0] || 'TMA Agent',
+      const formattedName = (u.displayName && u.displayName !== 'Agent User' && u.displayName !== 'TMA Agent')
+        ? u.displayName
+        : (u.email ? u.email.split('@')[0] : 'TMA Agent')
+
+      const key = u.uid || u.email
+      userMap.set(key, {
+        id: key,
+        name: formattedName,
         email: u.email || '',
         role: u.role || 'TMA Agent',
         color: colors[i % colors.length]
@@ -44,16 +77,25 @@ export function TvaSacredTimelineMonitor({ onSelectAgent }) {
     })
   }
 
-  // Extract unique users from entries if not present
+  // Extract unique users from real logged entries
   sourceEntries.forEach(e => {
-    const key = e.userId || e.email || e.userEmail || 'default-user'
-    if (!userMap.has(key)) {
+    const userEmail = e.userEmail || e.email
+    const userId = e.userId
+    if (!userId && !userEmail) return // Skip unassigned sample entries
+
+    const key = userId || userEmail
+    if (key && key !== 'agent-user' && userEmail !== 'agent@tma.org' && !userMap.has(key)) {
       const colors = ['#3B82F6', '#10B981', '#A855F7', '#F97316', '#EC4899', '#06B6D4', '#EAB308']
-      const name = e.userName || e.displayName || (e.userEmail ? e.userEmail.split('@')[0] : 'Agent User')
+      const name = (e.userName && e.userName !== 'Agent User') 
+        ? e.userName 
+        : (e.displayName && e.displayName !== 'Agent User')
+        ? e.displayName
+        : (userEmail ? userEmail.split('@')[0] : 'TMA Agent')
+
       userMap.set(key, {
         id: key,
         name,
-        email: e.userEmail || e.email || 'agent@tma.org',
+        email: userEmail || '',
         role: 'TMA Agent',
         color: colors[userMap.size % colors.length]
       })

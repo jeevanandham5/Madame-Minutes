@@ -49,10 +49,14 @@ export const firestoreService = {
     if (!isFirebaseConfigured || !db || !userObj?.uid) return
     try {
       const ref = doc(db, 'users', userObj.uid)
+      const cleanName = (userObj.displayName && userObj.displayName !== 'Agent User' && userObj.displayName !== 'TMA Agent')
+        ? userObj.displayName
+        : (userObj.email ? userObj.email.split('@')[0] : 'TMA Agent')
+
       await setDoc(ref, {
         uid: userObj.uid,
         email: userObj.email || '',
-        displayName: userObj.displayName || userObj.email?.split('@')[0] || 'TMA Agent',
+        displayName: cleanName,
         photoURL: userObj.photoURL || null,
         role: userObj.email === 'jeevajeevanandham30@gmail.com' ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
         isAdmin: userObj.email === 'jeevajeevanandham30@gmail.com',

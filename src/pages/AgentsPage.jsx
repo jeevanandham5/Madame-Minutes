@@ -1,16 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
   Users, Search, Shield, Activity, Clock, ChevronRight, CheckCircle2, Lock, FileText 
 } from 'lucide-react'
 import { AgentDetailModal } from '../components/admin/AgentDetailModal'
-import { useAuthStore } from '../store/useAuthStore'
+import { useAuthStore, getLocalRegisteredUsers } from '../store/useAuthStore'
 import { useTimesheetStore } from '../store/useTimesheetStore'
 import { formatHours } from '../utils/dateUtils'
 import dayjs from 'dayjs'
 
 export function AgentsPage() {
   const { user } = useAuthStore()
-  const { entries, allEntries, allUsers } = useTimesheetStore()
+  const { entries, allEntries, allUsers, syncAdminData } = useTimesheetStore()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedDept, setSelectedDept] = useState('All')
@@ -19,6 +19,13 @@ export function AgentsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
 
   const isAdmin = user?.email === 'jeevajeevanandham30@gmail.com'
+
+  // Sync admin data from Firestore on page load
+  useEffect(() => {
+    if (isAdmin && typeof syncAdminData === 'function') {
+      syncAdminData()
+    }
+  }, [isAdmin, syncAdminData])
 
   // Access control check
   if (!isAdmin) {
@@ -42,13 +49,18 @@ export function AgentsPage() {
   // Combine entries
   const sourceEntries = allEntries.length > 0 ? allEntries : entries
 
-  // Build real user map
+  // Build real user map - includes ALL registered users whether they have logged entries or not
   const userMap = new Map()
 
+  // 1. Current admin user
   if (user) {
+    const adminName = (user.displayName && user.displayName !== 'Agent User' && user.displayName !== 'TMA Agent')
+      ? user.displayName
+      : (user.email ? user.email.split('@')[0] : 'Jeevanandham (Admin)')
+
     userMap.set(user.uid || user.email, {
       id: user.uid || user.email,
-      name: user.displayName || user.email?.split('@')[0] || 'Jeevanandham (Admin)',
+      name: adminName,
       email: user.email || 'jeevajeevanandham30@gmail.com',
       role: 'Master Timeline Commander (Admin)',
       department: 'TMA Core Command',
@@ -57,12 +69,44 @@ export function AgentsPage() {
     })
   }
 
+  // 2. Add local registered users
+  const localUsers = getLocalRegisteredUsers()
+  if (localUsers && localUsers.length > 0) {
+    localUsers.forEach((u) => {
+      if (u.isGuest || u.email === 'agent@tma.org' || !u.email) return
+      const colors = ['#F59E0B', '#3B82F6', '#10B981', '#A855F7', '#F97316', '#EC4899', '#06B6D4']
+      const name = (u.displayName && u.displayName !== 'Agent User' && u.displayName !== 'TMA Agent')
+        ? u.displayName
+        : (u.email ? u.email.split('@')[0] : 'TMA Agent')
+
+      const key = u.uid || u.email
+      if (!userMap.has(key)) {
+        userMap.set(key, {
+          id: key,
+          name,
+          email: u.email,
+          role: u.role || 'TMA Agent',
+          department: u.email === 'jeevajeevanandham30@gmail.com' ? 'TMA Core Command' : 'Temporal Operations',
+          badgeId: `TMA-AGT-${String(userMap.size + 1).padStart(3, '0')}`,
+          color: colors[userMap.size % colors.length]
+        })
+      }
+    })
+  }
+
+  // 3. Add all registered users from Firestore users collection
   if (allUsers && allUsers.length > 0) {
     allUsers.forEach((u, i) => {
+      if (u.isGuest || u.email === 'agent@tma.org' || !u.email) return
       const colors = ['#F59E0B', '#3B82F6', '#10B981', '#A855F7', '#F97316', '#EC4899', '#06B6D4']
-      userMap.set(u.uid || u.email, {
-        id: u.uid || u.email,
-        name: u.displayName || u.email?.split('@')[0] || 'TMA Agent',
+      const formattedName = (u.displayName && u.displayName !== 'Agent User' && u.displayName !== 'TMA Agent')
+        ? u.displayName
+        : (u.email ? u.email.split('@')[0] : 'TMA Agent')
+
+      const key = u.uid || u.email
+      userMap.set(key, {
+        id: key,
+        name: formattedName,
         email: u.email || '',
         role: u.role || 'TMA Agent',
         department: u.email === 'jeevajeevanandham30@gmail.com' ? 'TMA Core Command' : 'Temporal Operations',
@@ -72,15 +116,25 @@ export function AgentsPage() {
     })
   }
 
+  // 3. Extract any missing users from real logged timesheets (ignoring unassigned initial sample entries)
   sourceEntries.forEach(e => {
-    const key = e.userId || e.email || e.userEmail || 'agent-user'
-    if (!userMap.has(key)) {
+    const userEmail = e.userEmail || e.email
+    const userId = e.userId
+    if (!userId && !userEmail) return // Skip unassigned sample entries
+
+    const key = userId || userEmail
+    if (key && key !== 'agent-user' && userEmail !== 'agent@tma.org' && !userMap.has(key)) {
       const colors = ['#3B82F6', '#10B981', '#A855F7', '#F97316', '#EC4899', '#06B6D4']
-      const name = e.userName || e.displayName || (e.userEmail ? e.userEmail.split('@')[0] : 'Agent User')
+      const name = (e.userName && e.userName !== 'Agent User') 
+        ? e.userName 
+        : (e.displayName && e.displayName !== 'Agent User')
+        ? e.displayName
+        : (userEmail ? userEmail.split('@')[0] : 'TMA Agent')
+
       userMap.set(key, {
         id: key,
         name,
-        email: e.userEmail || e.email || 'agent@tma.org',
+        email: userEmail || '',
         role: 'TMA Agent',
         department: 'Temporal Operations',
         badgeId: `TMA-LOG-${userMap.size + 1}`,

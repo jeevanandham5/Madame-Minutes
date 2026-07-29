@@ -9,6 +9,29 @@ import {
 import { auth, googleProvider, isFirebaseConfigured } from '../firebase/config'
 import { firestoreService } from '../firebase/firestoreService'
 
+const saveLocalRegisteredUser = (userObj) => {
+  if (!userObj || !userObj.email) return
+  try {
+    const existingStr = localStorage.getItem('madame_registered_users') || '[]'
+    const existing = JSON.parse(existingStr)
+    if (!existing.some(u => u.email === userObj.email || u.uid === userObj.uid)) {
+      existing.push(userObj)
+      localStorage.setItem('madame_registered_users', JSON.stringify(existing))
+    }
+  } catch (err) {
+    console.error('Error saving local user profile:', err)
+  }
+}
+
+export const getLocalRegisteredUsers = () => {
+  try {
+    const existingStr = localStorage.getItem('madame_registered_users') || '[]'
+    return JSON.parse(existingStr)
+  } catch {
+    return []
+  }
+}
+
 export const useAuthStore = create((set, get) => ({
   user: null,
   isAuthLoading: true,
@@ -35,17 +58,22 @@ export const useAuthStore = create((set, get) => ({
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
         const isAdmin = currentUser.email === 'jeevajeevanandham30@gmail.com'
+        const computedName = (currentUser.displayName && currentUser.displayName !== 'Agent User' && currentUser.displayName !== 'TMA Agent')
+          ? currentUser.displayName
+          : (currentUser.email ? currentUser.email.split('@')[0] : 'TMA Agent')
+
         const userObj = {
           uid: currentUser.uid,
           email: currentUser.email,
-          displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'TMA Agent',
+          displayName: computedName,
           photoURL: currentUser.photoURL,
           role: isAdmin ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
           isAdmin
         }
         set({ user: userObj, isAuthLoading: false })
-        // Save user profile in Firestore
+        // Save user profile in Firestore and local registry
         firestoreService.saveUserProfile(userObj)
+        saveLocalRegisteredUser(userObj)
       } else {
         set({
           user: {
@@ -66,22 +94,36 @@ export const useAuthStore = create((set, get) => ({
   },
 
   loginWithEmail: async (email, password) => {
+    const isAdmin = email === 'jeevajeevanandham30@gmail.com'
+    const computedName = email.split('@')[0]
+    const fallbackUserObj = {
+      uid: 'user-' + email.replace(/[^a-zA-Z0-9]/g, '_'),
+      email,
+      displayName: computedName,
+      role: isAdmin ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
+      isAdmin,
+      isGuest: false
+    }
+
     if (!isFirebaseConfigured || !auth) {
-      const isAdmin = email === 'jeevajeevanandham30@gmail.com'
-      set({
-        user: {
-          uid: isAdmin ? 'tma-admin-jeeva' : 'tma-agent-007',
-          email,
-          displayName: email.split('@')[0],
-          role: isAdmin ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
-          isAdmin,
-          isGuest: false
-        }
-      })
+      set({ user: fallbackUserObj })
+      saveLocalRegisteredUser(fallbackUserObj)
       return { success: true }
     }
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const cred = await signInWithEmailAndPassword(auth, email, password)
+      if (cred?.user) {
+        const userObj = {
+          uid: cred.user.uid,
+          email: cred.user.email,
+          displayName: cred.user.displayName || cred.user.email?.split('@')[0] || computedName,
+          photoURL: cred.user.photoURL,
+          role: isAdmin ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
+          isAdmin
+        }
+        await firestoreService.saveUserProfile(userObj)
+        saveLocalRegisteredUser(userObj)
+      }
       return { success: true }
     } catch (err) {
       return { success: false, error: err.message }
@@ -89,9 +131,36 @@ export const useAuthStore = create((set, get) => ({
   },
 
   registerWithEmail: async (email, password) => {
-    if (!isFirebaseConfigured || !auth) return { success: true }
+    const isAdmin = email === 'jeevajeevanandham30@gmail.com'
+    const computedName = email.split('@')[0]
+    const fallbackUserObj = {
+      uid: 'user-' + email.replace(/[^a-zA-Z0-9]/g, '_'),
+      email,
+      displayName: computedName,
+      role: isAdmin ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
+      isAdmin,
+      isGuest: false
+    }
+
+    if (!isFirebaseConfigured || !auth) {
+      set({ user: fallbackUserObj })
+      saveLocalRegisteredUser(fallbackUserObj)
+      return { success: true }
+    }
     try {
-      await createUserWithEmailAndPassword(auth, email, password)
+      const cred = await createUserWithEmailAndPassword(auth, email, password)
+      if (cred?.user) {
+        const userObj = {
+          uid: cred.user.uid,
+          email: cred.user.email,
+          displayName: computedName,
+          photoURL: cred.user.photoURL,
+          role: isAdmin ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
+          isAdmin
+        }
+        await firestoreService.saveUserProfile(userObj)
+        saveLocalRegisteredUser(userObj)
+      }
       return { success: true }
     } catch (err) {
       return { success: false, error: err.message }
@@ -101,7 +170,21 @@ export const useAuthStore = create((set, get) => ({
   loginWithGoogle: async () => {
     if (!isFirebaseConfigured || !auth || !googleProvider) return { success: true }
     try {
-      await signInWithPopup(auth, googleProvider)
+      const cred = await signInWithPopup(auth, googleProvider)
+      if (cred?.user) {
+        const isAdmin = cred.user.email === 'jeevajeevanandham30@gmail.com'
+        const computedName = cred.user.displayName || cred.user.email?.split('@')[0] || 'TMA Agent'
+        const userObj = {
+          uid: cred.user.uid,
+          email: cred.user.email,
+          displayName: computedName,
+          photoURL: cred.user.photoURL,
+          role: isAdmin ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
+          isAdmin
+        }
+        await firestoreService.saveUserProfile(userObj)
+        saveLocalRegisteredUser(userObj)
+      }
       return { success: true }
     } catch (err) {
       return { success: false, error: err.message }
@@ -125,3 +208,7 @@ export const useAuthStore = create((set, get) => ({
     })
   }
 }))
+
+if (typeof window !== 'undefined') {
+  window.__useAuthStore = useAuthStore
+}
