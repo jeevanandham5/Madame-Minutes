@@ -11,6 +11,7 @@ import { ProjectsPage } from './pages/ProjectsPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { SettingsPage } from './pages/SettingsPage'
+import { AgentsPage } from './pages/AgentsPage'
 import { MadameMinuteLogo } from './components/common/MadameMinuteLogo'
 import { ScanlineOverlay } from './components/common/ScanlineOverlay'
 import { useAuthStore } from './store/useAuthStore'
@@ -42,7 +43,7 @@ function App() {
       if (user && !user.isGuest) {
         setViewMode('app')
         if (user.uid) {
-          syncFirestoreEntries(user.uid)
+          syncFirestoreEntries(user.uid, user.email)
         }
       } else {
         setViewMode('landing')
@@ -80,7 +81,7 @@ function App() {
   const renderActivePage = (onOpenAddModal) => {
     switch (activeNav) {
       case 'Dashboard':
-        return <DashboardPage onOpenAddModal={onOpenAddModal} />
+        return <DashboardPage onOpenAddModal={onOpenAddModal} onNavigate={setActiveNav} />
       case 'Timesheet':
         return <TimesheetPage onOpenAddModal={onOpenAddModal} />
       case 'Timeline':
@@ -95,8 +96,11 @@ function App() {
         return <ProfilePage />
       case 'Settings':
         return <SettingsPage />
+      case 'All Agents':
+      case 'Agents':
+        return <AgentsPage />
       default:
-        return <DashboardPage onOpenAddModal={onOpenAddModal} />
+        return <DashboardPage onOpenAddModal={onOpenAddModal} onNavigate={setActiveNav} />
     }
   }
 

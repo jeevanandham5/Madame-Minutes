@@ -3,6 +3,7 @@ import { FileText, Download, Printer, Filter, Calendar } from 'lucide-react'
 import { useTimesheetStore } from '../store/useTimesheetStore'
 import { useAuthStore } from '../store/useAuthStore'
 import { PDFReportModal } from '../components/reports/PDFReportModal'
+import { formatHours } from '../utils/dateUtils'
 
 export function ReportsPage() {
   const { entries } = useTimesheetStore()
@@ -41,9 +42,9 @@ export function ReportsPage() {
             <div key={e.id} className="p-3 bg-[#141414] border border-zinc-800 rounded-lg flex items-center justify-between text-xs">
               <div>
                 <strong className="text-amber-300 block">{e.taskTitle}</strong>
-                <span className="text-[11px] text-zinc-500">{e.project} • {e.date}</span>
+                <span className="text-[11px] text-zinc-500">{e.project} • {e.date} • {e.startTime} - {e.endTime}</span>
               </div>
-              <strong className="text-amber-400 text-sm font-bold">{e.hours} hrs</strong>
+              <strong className="text-amber-400 text-sm font-bold">{formatHours(e.hours)} ({e.hours}h)</strong>
             </div>
           ))}
         </div>

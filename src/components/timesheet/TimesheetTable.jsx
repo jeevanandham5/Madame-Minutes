@@ -7,6 +7,7 @@ import { useProjectStore } from '../../store/useProjectStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { exportToCSV } from '../../utils/exportUtils'
 import { rewriteTaskDescription } from '../../utils/aiRewriter'
+import { formatHoursDetailed, formatHours } from '../../utils/dateUtils'
 import { toast } from 'sonner'
 
 export function TimesheetTable({ onOpenAddModal }) {
@@ -30,6 +31,8 @@ export function TimesheetTable({ onOpenAddModal }) {
   const [selectedIds, setSelectedIds] = useState([])
   const [editingCell, setEditingCell] = useState(null) // { id, field }
   const [editValue, setEditValue] = useState('')
+  const [editStartTime, setEditStartTime] = useState('09:00')
+  const [editEndTime, setEditEndTime] = useState('17:00')
 
   // Filter entries
   const filtered = entries.filter(e => {
@@ -81,9 +84,14 @@ export function TimesheetTable({ onOpenAddModal }) {
     toast.success('Timesheet CSV downloaded')
   }
 
-  const handleStartCellEdit = (id, field, currentValue) => {
-    setEditingCell({ id, field })
-    setEditValue(currentValue || '')
+  const handleStartCellEdit = (item, field) => {
+    setEditingCell({ id: item.id, field })
+    if (field === 'timeRange') {
+      setEditStartTime(item.startTime || '09:00')
+      setEditEndTime(item.endTime || '17:00')
+    } else {
+      setEditValue(item[field] || '')
+    }
   }
 
   const handleSaveCellEdit = (id, field) => {
@@ -91,6 +99,13 @@ export function TimesheetTable({ onOpenAddModal }) {
     updateEntry(id, { [field]: editValue }, user?.uid)
     setEditingCell(null)
     toast.success('Entry updated')
+  }
+
+  const handleSaveTimeEdit = (id) => {
+    if (!editingCell) return
+    updateEntry(id, { startTime: editStartTime, endTime: editEndTime }, user?.uid)
+    setEditingCell(null)
+    toast.success('Time range updated & hours recalculated')
   }
 
   const handleAiRewriteCell = (id, currentTask, project) => {
@@ -280,7 +295,7 @@ export function TimesheetTable({ onOpenAddModal }) {
                         ) : (
                           <div className="flex items-center justify-between group">
                             <span 
-                              onDoubleClick={() => handleStartCellEdit(item.id, 'taskTitle', item.taskTitle)}
+                              onDoubleClick={() => handleStartCellEdit(item, 'taskTitle')}
                               className={`font-semibold cursor-pointer ${isHoliday ? 'text-purple-200' : 'text-zinc-200 group-hover:text-amber-300'}`}
                               title="Double click to inline edit"
                             >
@@ -324,12 +339,51 @@ export function TimesheetTable({ onOpenAddModal }) {
 
                       {/* Time Range */}
                       <td className="p-3 whitespace-nowrap text-zinc-400 text-[11px]">
-                        {item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : '—'}
+                        {editingCell?.id === item.id && editingCell?.field === 'timeRange' ? (
+                          <div className="flex items-center gap-1">
+                            <input
+                              type="time"
+                              value={editStartTime}
+                              onChange={(e) => setEditStartTime(e.target.value)}
+                              className="bg-[#141414] border border-amber-500 rounded px-1 py-0.5 text-xs text-amber-200 focus:outline-none"
+                              autoFocus
+                            />
+                            <span>-</span>
+                            <input
+                              type="time"
+                              value={editEndTime}
+                              onChange={(e) => setEditEndTime(e.target.value)}
+                              className="bg-[#141414] border border-amber-500 rounded px-1 py-0.5 text-xs text-amber-200 focus:outline-none"
+                            />
+                            <button
+                              onClick={() => handleSaveTimeEdit(item.id)}
+                              className="p-0.5 text-emerald-400 hover:text-emerald-300 cursor-pointer"
+                              title="Save time range"
+                            >
+                              <Check className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setEditingCell(null)}
+                              className="p-0.5 text-zinc-500 hover:text-zinc-300 cursor-pointer"
+                              title="Cancel"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <span
+                            onDoubleClick={() => handleStartCellEdit(item, 'timeRange')}
+                            className="cursor-pointer hover:text-amber-300 transition-colors"
+                            title="Double click to edit time range"
+                          >
+                            {item.startTime && item.endTime ? `${item.startTime} - ${item.endTime}` : '—'}
+                          </span>
+                        )}
                       </td>
 
                       {/* Hours */}
                       <td className="p-3 whitespace-nowrap text-right font-bold text-amber-400">
-                        {item.hours}h
+                        {formatHoursDetailed(item.hours)}
                       </td>
 
                       {/* Actions */}

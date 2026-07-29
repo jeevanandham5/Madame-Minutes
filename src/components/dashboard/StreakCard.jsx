@@ -1,6 +1,6 @@
 import React from 'react'
 import { Flame, Trophy, Clock, CheckCircle2 } from 'lucide-react'
-import { calculateStreak } from '../../utils/dateUtils'
+import { calculateStreak, formatHours } from '../../utils/dateUtils'
 
 export function StreakCard({ entries }) {
   const streak = calculateStreak(entries)
@@ -26,10 +26,10 @@ export function StreakCard({ entries }) {
 
         {/* Total Hours */}
         <div className="p-3 bg-[#141414] border border-zinc-800 rounded-lg">
-          <div className="flex items-center justify-center gap-1 text-amber-400 font-extrabold text-2xl">
-            <span>{totalHours.toFixed(1)}</span>
+          <div className="flex items-center justify-center gap-1 text-amber-400 font-extrabold text-lg">
+            <span>{formatHours(totalHours)}</span>
           </div>
-          <span className="text-[10px] text-zinc-500 uppercase block mt-1">TOTAL HOURS</span>
+          <span className="text-[10px] text-zinc-500 uppercase block mt-1">TOTAL TIME</span>
         </div>
 
         {/* Tasks Done */}

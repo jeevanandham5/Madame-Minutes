@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Clock3, Plus, FileText, Settings, Copy, Zap, ArrowRight, X, Calendar, Tag } from 'lucide-react'
+import { Search, Clock3, Plus, FileText, Settings, Copy, Zap, ArrowRight, X, Calendar, Tag, Users } from 'lucide-react'
 import { useTimesheetStore } from '../../store/useTimesheetStore'
 import dayjs from 'dayjs'
 
@@ -73,6 +73,13 @@ export function CommandPalette({ isOpen, onClose, onNavigate, onOpenAddModal, on
       subtitle: 'Visual 24h drag block timeline',
       icon: Zap,
       run: () => { onNavigate('Timeline'); onClose() }
+    },
+    {
+      id: 'act-nav-agents',
+      title: 'Open All Agents (Admin Audit)',
+      subtitle: 'Inspect workforce shift trends, hours & compliance',
+      icon: Users,
+      run: () => { onNavigate('All Agents'); onClose() }
     },
     {
       id: 'act-pdf',

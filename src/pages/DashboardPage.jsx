@@ -6,12 +6,13 @@ import { StreakCard } from '../components/dashboard/StreakCard'
 import { MadameMinuteTipCard } from '../components/dashboard/MadameMinuteTipCard'
 import { ActivityHeatmap } from '../components/dashboard/ActivityHeatmap'
 import { WorkPulseChart } from '../components/dashboard/WorkPulseChart'
+import { TvaSacredTimelineMonitor } from '../components/dashboard/TvaSacredTimelineMonitor'
 import { useTimesheetStore } from '../store/useTimesheetStore'
 import { useAuthStore } from '../store/useAuthStore'
 import { useSettingsStore } from '../store/useSettingsStore'
 import { HyperText } from '../components/common/HyperText'
 
-export function DashboardPage({ onOpenAddModal }) {
+export function DashboardPage({ onOpenAddModal, onNavigate }) {
   const { entries } = useTimesheetStore()
   const { user } = useAuthStore()
   const { timeFormat } = useSettingsStore()
@@ -26,6 +27,8 @@ export function DashboardPage({ onOpenAddModal }) {
   const timeOfDayGreeting = currentHour < 12 ? 'Good Morning' : currentHour < 18 ? 'Good Afternoon' : 'Good Evening'
   const fullDateStr = now.format('dddd, MMMM D, YYYY')
   const timeTickerStr = timeFormat === '12h' ? now.format('hh:mm:ss A') : now.format('HH:mm:ss')
+
+  const isAdmin = user?.email === 'jeevajeevanandham30@gmail.com'
 
   return (
     <div className="space-y-8 font-mono">
@@ -63,6 +66,11 @@ export function DashboardPage({ onOpenAddModal }) {
           </button>
         </div>
       </div>
+
+      {/* TVA Sacred Timeline Monitor CRT Graphic (10:00 AM to 07:00 PM Thresholds) - ADMIN ONLY */}
+      {isAdmin && (
+        <TvaSacredTimelineMonitor onSelectAgent={() => onNavigate && onNavigate('Agents')} />
+      )}
 
       {/* Madame Minute Announcement Card */}
       <MadameMinuteTipCard />

@@ -4,7 +4,7 @@ import { useTimesheetStore } from '../../store/useTimesheetStore'
 import { useProjectStore } from '../../store/useProjectStore'
 import { useAuthStore } from '../../store/useAuthStore'
 import { rewriteTaskDescription } from '../../utils/aiRewriter'
-import { calculateHours } from '../../utils/dateUtils'
+import { calculateHours, formatHoursDetailed } from '../../utils/dateUtils'
 import { playTvaSuccess, playTvaChirp, playTvaClick } from '../../utils/tvaAudio'
 import { toast } from 'sonner'
 import dayjs from 'dayjs'
@@ -29,7 +29,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
   const [description, setDescription] = useState('')
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('17:00')
-  const [breakMinutes, setBreakMinutes] = useState('30')
+  const [breakMinutes, setBreakMinutes] = useState('0')
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [status, setStatus] = useState('Completed')
   const [tagInput, setTagInput] = useState('Frontend, TMA')
@@ -103,6 +103,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
       entryType,
       startTime: isHoliday ? '00:00' : startTime,
       endTime: isHoliday ? '23:59' : endTime,
+      breakMinutes: isHoliday ? 0 : (parseInt(breakMinutes, 10) || 0),
       hours: computedHours,
       tags
     }, user?.uid)
@@ -265,14 +266,14 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
           </div>
 
           {/* Date & Time Row */}
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-4 gap-2">
             <div>
               <label className="text-xs text-zinc-400 font-bold block mb-1 font-mono">DATE</label>
               <input
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 focus:outline-none"
+                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2 py-1.5 text-xs text-amber-300 focus:outline-none"
               />
             </div>
             <div>
@@ -282,7 +283,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
                 value={startTime}
                 disabled={entryType === 'holiday'}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 focus:outline-none disabled:opacity-50"
+                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2 py-1.5 text-xs text-amber-300 focus:outline-none disabled:opacity-50"
               />
             </div>
             <div>
@@ -292,7 +293,20 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
                 value={endTime}
                 disabled={entryType === 'holiday'}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 focus:outline-none disabled:opacity-50"
+                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2 py-1.5 text-xs text-amber-300 focus:outline-none disabled:opacity-50"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-400 font-bold block mb-1">BREAK (MIN)</label>
+              <input
+                type="number"
+                min="0"
+                max="480"
+                value={breakMinutes}
+                disabled={entryType === 'holiday'}
+                onChange={(e) => setBreakMinutes(e.target.value)}
+                placeholder="0"
+                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2 py-1.5 text-xs text-amber-300 focus:outline-none disabled:opacity-50"
               />
             </div>
           </div>
@@ -305,7 +319,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
           }`}>
             <span>{entryType === 'holiday' ? 'Holiday Duration Credit:' : 'Calculated Net Duration:'}</span>
             <strong className={`text-sm font-bold ${entryType === 'holiday' ? 'text-purple-300' : 'text-amber-400'}`}>
-              {computedHours} Hours ({entryType === 'holiday' ? 'Paid Recess' : 'Work'})
+              {formatHoursDetailed(computedHours)} ({entryType === 'holiday' ? 'Paid Recess' : 'Work'})
             </strong>
           </div>
 

@@ -36,6 +36,32 @@ export function calculateHours(startTime, endTime, breakMinutes = 0) {
   return parseFloat(hours.toFixed(2))
 }
 
+export function formatHours(hours) {
+  const hrs = parseFloat(hours) || 0
+  if (hrs <= 0) return '0h'
+  
+  const totalMinutes = Math.round(hrs * 60)
+  const h = Math.floor(totalMinutes / 60)
+  const m = totalMinutes % 60
+  
+  if (h === 0) return `${m}m`
+  if (m === 0) return `${h}h`
+  return `${h}h ${m}m`
+}
+
+export function formatHoursDetailed(hours) {
+  const hrs = parseFloat(hours) || 0
+  if (hrs <= 0) return '0h'
+  
+  const totalMinutes = Math.round(hrs * 60)
+  const h = Math.floor(totalMinutes / 60)
+  const m = totalMinutes % 60
+  
+  if (h === 0) return `${m}m (${hrs}h)`
+  if (m === 0) return `${h}h`
+  return `${h}h ${m}m (${hrs}h)`
+}
+
 export function calculateStreak(entries) {
   if (!entries || entries.length === 0) return 0
 

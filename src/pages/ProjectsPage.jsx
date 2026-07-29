@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FolderKanban, Plus, Trash2, Tag, Layers } from 'lucide-react'
 import { useProjectStore } from '../store/useProjectStore'
 import { useTimesheetStore } from '../store/useTimesheetStore'
+import { formatHours } from '../utils/dateUtils'
 import { toast } from 'sonner'
 
 export function ProjectsPage() {
@@ -75,7 +76,7 @@ export function ProjectsPage() {
 
                   <div className="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between text-xs">
                     <span className="text-zinc-400">Logged Time:</span>
-                    <strong className="text-amber-400 font-bold">{totalHours.toFixed(1)} hrs ({projectEntries.length} tasks)</strong>
+                    <strong className="text-amber-400 font-bold">{formatHours(totalHours)} ({projectEntries.length} tasks)</strong>
                   </div>
                 </div>
               )

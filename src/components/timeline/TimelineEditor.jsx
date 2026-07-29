@@ -3,6 +3,7 @@ import { Plus, Clock, Sparkles, ChevronLeft, ChevronRight, Palmtree } from 'luci
 import dayjs from 'dayjs'
 import { useTimesheetStore } from '../../store/useTimesheetStore'
 import { useProjectStore } from '../../store/useProjectStore'
+import { formatHours } from '../../utils/dateUtils'
 
 export function TimelineEditor({ onOpenAddModal }) {
   const { entries, addEntry } = useTimesheetStore()
@@ -127,7 +128,7 @@ export function TimelineEditor({ onOpenAddModal }) {
                     <span className="text-[11px] text-zinc-400 flex items-center gap-2 mt-0.5">
                       <strong className={isHolidayEntry ? 'text-purple-400' : 'text-amber-500'}>{entry.project}</strong>
                       <span>•</span>
-                      <span>{entry.startTime} - {entry.endTime} ({entry.hours}h)</span>
+                      <span>{entry.startTime} - {entry.endTime} ({formatHours(entry.hours)})</span>
                     </span>
                   </div>
                   <span className={`px-2 py-0.5 text-[10px] font-bold rounded uppercase ${

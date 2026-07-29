@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Palmtree } from 'lucide-react'
 import dayjs from 'dayjs'
 import { useTimesheetStore } from '../store/useTimesheetStore'
+import { formatHours } from '../utils/dateUtils'
 
 export function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(dayjs())
@@ -87,7 +88,7 @@ export function CalendarPage() {
                     </span>
                   ) : totalHours > 0 && (
                     <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-400 font-bold">
-                      {totalHours}h
+                      {formatHours(totalHours)}
                     </span>
                   )}
                 </div>

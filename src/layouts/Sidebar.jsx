@@ -1,6 +1,6 @@
 import React from 'react'
 import { 
-  LayoutDashboard, Clock3, CalendarDays, FolderKanban, FileText, UserRound, Settings, Zap, LogOut, X 
+  LayoutDashboard, Clock3, CalendarDays, FolderKanban, FileText, UserRound, Settings, Zap, LogOut, X, Users, ShieldAlert 
 } from 'lucide-react'
 import { MissMinutesLogo } from '../components/common/MissMinutesLogo'
 import { HyperText } from '../components/common/HyperText'
@@ -9,6 +9,8 @@ import { toast } from 'sonner'
 
 export function Sidebar({ activeNav, onNavigate, onOpenAddModal, onNavigateLanding, isMobileOpen, onCloseMobile }) {
   const { user, logoutUser, isFirebaseActive } = useAuthStore()
+
+  const isAdmin = user?.email === 'jeevajeevanandham30@gmail.com'
 
   const handleExitVault = async () => {
     await logoutUser()
@@ -32,6 +34,11 @@ export function Sidebar({ activeNav, onNavigate, onOpenAddModal, onNavigateLandi
     { label: 'Projects', icon: FolderKanban },
     { label: 'Reports', icon: FileText },
   ]
+
+  // Add Admin-only "All Agents" tab strictly for Admin user jeevajeevanandham30@gmail.com
+  if (isAdmin) {
+    navItems.push({ label: 'All Agents', icon: ShieldAlert, badge: 'ADMIN' })
+  }
 
   const sidebarContent = (
     <div className="flex flex-col justify-between h-full font-mono select-none p-5">
@@ -65,13 +72,14 @@ export function Sidebar({ activeNav, onNavigate, onOpenAddModal, onNavigateLandi
         </div>
 
         {/* Command Center Label */}
-        <div className="text-[10px] text-amber-500 font-extrabold tracking-widest uppercase mb-3 px-2">
-          TMA COMMAND CENTER
+        <div className="text-[10px] text-amber-500 font-extrabold tracking-widest uppercase mb-3 px-2 flex items-center justify-between">
+          <span>TMA COMMAND CENTER</span>
+          {isAdmin && <span className="text-[9px] bg-amber-500 text-black px-1.5 py-0.5 rounded font-black">ADMIN</span>}
         </div>
 
         {/* Navigation Items */}
         <nav className="space-y-1">
-          {navItems.map(({ label, icon: Icon }) => {
+          {navItems.map(({ label, icon: Icon, badge }) => {
             const isActive = activeNav === label
             return (
               <button
@@ -80,6 +88,8 @@ export function Sidebar({ activeNav, onNavigate, onOpenAddModal, onNavigateLandi
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer group ${
                   isActive
                     ? 'bg-amber-500 text-black shadow-[0_0_15px_rgba(245,158,11,0.4)]'
+                    : label === 'All Agents'
+                    ? 'text-amber-400 hover:bg-amber-500/20 border border-amber-500/30'
                     : 'text-zinc-400 hover:text-amber-300 hover:bg-zinc-800/80'
                 }`}
               >
@@ -87,9 +97,11 @@ export function Sidebar({ activeNav, onNavigate, onOpenAddModal, onNavigateLandi
                   <Icon className={`w-4 h-4 ${isActive ? 'text-black' : 'text-amber-500 group-hover:scale-110'} transition-transform`} />
                   <span>{label}</span>
                 </div>
-                {label === 'Timeline' && (
-                  <span className="px-1.5 py-0.5 rounded text-[9px] bg-orange-500 text-black font-extrabold uppercase animate-pulse">
-                    NEW
+                {badge && (
+                  <span className={`px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase ${
+                    badge === 'ADMIN' ? 'bg-amber-500 text-black' : 'bg-orange-500 text-black'
+                  }`}>
+                    {badge}
                   </span>
                 )}
               </button>

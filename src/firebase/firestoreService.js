@@ -3,6 +3,7 @@ import {
   doc, 
   getDocs, 
   addDoc, 
+  setDoc,
   updateDoc, 
   deleteDoc, 
   query, 
@@ -25,6 +26,50 @@ export const firestoreService = {
       return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
     } catch (err) {
       console.error('Error fetching timesheets from Firestore:', err)
+      return null
+    }
+  },
+
+  async fetchAllTimesheets() {
+    if (!isFirebaseConfigured || !db) return null
+    try {
+      const q = query(
+        collection(db, 'timesheets'),
+        orderBy('createdAt', 'desc')
+      )
+      const snapshot = await getDocs(q)
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    } catch (err) {
+      console.error('Error fetching all timesheets from Firestore:', err)
+      return null
+    }
+  },
+
+  async saveUserProfile(userObj) {
+    if (!isFirebaseConfigured || !db || !userObj?.uid) return
+    try {
+      const ref = doc(db, 'users', userObj.uid)
+      await setDoc(ref, {
+        uid: userObj.uid,
+        email: userObj.email || '',
+        displayName: userObj.displayName || userObj.email?.split('@')[0] || 'TMA Agent',
+        photoURL: userObj.photoURL || null,
+        role: userObj.email === 'jeevajeevanandham30@gmail.com' ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
+        isAdmin: userObj.email === 'jeevajeevanandham30@gmail.com',
+        updatedAt: serverTimestamp()
+      }, { merge: true })
+    } catch (err) {
+      console.error('Error saving user profile to Firestore:', err)
+    }
+  },
+
+  async fetchAllUsers() {
+    if (!isFirebaseConfigured || !db) return null
+    try {
+      const snapshot = await getDocs(collection(db, 'users'))
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+    } catch (err) {
+      console.error('Error fetching all users from Firestore:', err)
       return null
     }
   },

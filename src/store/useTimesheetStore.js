@@ -2,6 +2,18 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import dayjs from 'dayjs'
 import { firestoreService } from '../firebase/firestoreService'
+import { calculateHours } from '../utils/dateUtils'
+
+const sanitizeEntryHours = (entry) => {
+  if (entry.startTime && entry.endTime && !entry.isHoliday && entry.entryType !== 'holiday') {
+    const computed = calculateHours(entry.startTime, entry.endTime, entry.breakMinutes || 0)
+    // If hours is missing, 0, or calculated with old 30-min break default
+    if (!entry.hours || entry.hours === 0 || entry.breakMinutes === undefined) {
+      return { ...entry, hours: computed, breakMinutes: entry.breakMinutes || 0 }
+    }
+  }
+  return entry
+}
 
 const INITIAL_ENTRIES = [
   {
@@ -14,6 +26,7 @@ const INITIAL_ENTRIES = [
     startTime: '09:00',
     endTime: '12:30',
     hours: 3.5,
+    breakMinutes: 0,
     tags: ['Critical', 'Nexus'],
     createdAt: new Date().toISOString()
   },
@@ -27,6 +40,7 @@ const INITIAL_ENTRIES = [
     startTime: '13:30',
     endTime: '17:00',
     hours: 3.5,
+    breakMinutes: 0,
     tags: ['AI', 'Audio'],
     createdAt: new Date().toISOString()
   },
@@ -40,6 +54,7 @@ const INITIAL_ENTRIES = [
     startTime: '10:00',
     endTime: '16:00',
     hours: 6.0,
+    breakMinutes: 0,
     tags: ['Frontend', 'Performance'],
     createdAt: new Date().toISOString()
   },
@@ -53,6 +68,7 @@ const INITIAL_ENTRIES = [
     startTime: '08:30',
     endTime: '15:30',
     hours: 7.0,
+    breakMinutes: 0,
     tags: ['Security', 'Audit'],
     createdAt: new Date().toISOString()
   },
@@ -68,15 +84,18 @@ const INITIAL_ENTRIES = [
     startTime: '00:00',
     endTime: '23:59',
     hours: 8.0,
+    breakMinutes: 0,
     tags: ['Holiday', 'Recess'],
     createdAt: new Date().toISOString()
   }
-]
+].map(sanitizeEntryHours)
 
 export const useTimesheetStore = create(
   persist(
     (set, get) => ({
       entries: INITIAL_ENTRIES,
+      allEntries: [],
+      allUsers: [],
       activeTimer: {
         isRunning: false,
         elapsedSeconds: 0,
@@ -93,23 +112,42 @@ export const useTimesheetStore = create(
       setSelectedProjectFilter: (proj) => set({ selectedProjectFilter: proj }),
       setSelectedStatusFilter: (status) => set({ selectedStatusFilter: status }),
 
-      syncFirestoreEntries: async (userId) => {
+      syncFirestoreEntries: async (userId, userEmail = '') => {
         if (!userId) return
         const remoteEntries = await firestoreService.fetchTimesheets(userId)
         if (remoteEntries && Array.isArray(remoteEntries) && remoteEntries.length > 0) {
-          set({ entries: remoteEntries })
+          set({ entries: remoteEntries.map(sanitizeEntryHours) })
+        }
+        if (userEmail === 'jeevajeevanandham30@gmail.com') {
+          get().syncAdminData()
+        }
+      },
+
+      syncAdminData: async () => {
+        const remoteAllEntries = await firestoreService.fetchAllTimesheets()
+        const remoteAllUsers = await firestoreService.fetchAllUsers()
+        if (remoteAllEntries && Array.isArray(remoteAllEntries)) {
+          set({ allEntries: remoteAllEntries.map(sanitizeEntryHours) })
+        }
+        if (remoteAllUsers && Array.isArray(remoteAllUsers)) {
+          set({ allUsers: remoteAllUsers })
         }
       },
 
       addEntry: async (newEntry, userId = null) => {
         const id = 'tma-entry-' + Date.now()
-        const entryToAdd = {
+        const computedHours = (newEntry.startTime && newEntry.endTime && !newEntry.isHoliday)
+          ? calculateHours(newEntry.startTime, newEntry.endTime, newEntry.breakMinutes || 0)
+          : (newEntry.hours || 0)
+
+        const entryToAdd = sanitizeEntryHours({
           id,
           date: dayjs().format('YYYY-MM-DD'),
           status: 'Completed',
           createdAt: new Date().toISOString(),
-          ...newEntry
-        }
+          ...newEntry,
+          hours: computedHours
+        })
 
         set(state => ({ entries: [entryToAdd, ...state.entries] }))
 
@@ -125,12 +163,21 @@ export const useTimesheetStore = create(
 
       updateEntry: async (id, updates, userId = null) => {
         const target = get().entries.find(e => e.id === id)
+        if (!target) return
+        const updatedRaw = { ...target, ...updates }
+        if (updates.startTime !== undefined || updates.endTime !== undefined || updates.breakMinutes !== undefined) {
+          if (updatedRaw.startTime && updatedRaw.endTime && !updatedRaw.isHoliday) {
+            updatedRaw.hours = calculateHours(updatedRaw.startTime, updatedRaw.endTime, updatedRaw.breakMinutes || 0)
+          }
+        }
+        const updatedItem = sanitizeEntryHours(updatedRaw)
+
         set(state => ({
-          entries: state.entries.map(item => item.id === id ? { ...item, ...updates } : item)
+          entries: state.entries.map(item => item.id === id ? updatedItem : item)
         }))
 
         if (userId && (target?.docId || id)) {
-          await firestoreService.updateTimesheet(target?.docId || id, updates)
+          await firestoreService.updateTimesheet(target?.docId || id, updatedItem)
         }
       },
 

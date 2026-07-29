@@ -7,8 +7,9 @@ import {
   onAuthStateChanged 
 } from 'firebase/auth'
 import { auth, googleProvider, isFirebaseConfigured } from '../firebase/config'
+import { firestoreService } from '../firebase/firestoreService'
 
-export const useAuthStore = create((set) => ({
+export const useAuthStore = create((set, get) => ({
   user: null,
   isAuthLoading: true,
   isFirebaseActive: isFirebaseConfigured,
@@ -23,7 +24,8 @@ export const useAuthStore = create((set) => ({
           displayName: 'Agent User',
           photoURL: null,
           role: 'Senior Task Analyst',
-          isGuest: true
+          isGuest: true,
+          isAdmin: false
         },
         isAuthLoading: false
       })
@@ -32,16 +34,18 @@ export const useAuthStore = create((set) => ({
 
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (currentUser) {
-        set({
-          user: {
-            uid: currentUser.uid,
-            email: currentUser.email,
-            displayName: currentUser.displayName || currentUser.email.split('@')[0],
-            photoURL: currentUser.photoURL,
-            role: 'TMA Agent'
-          },
-          isAuthLoading: false
-        })
+        const isAdmin = currentUser.email === 'jeevajeevanandham30@gmail.com'
+        const userObj = {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName || currentUser.email?.split('@')[0] || 'TMA Agent',
+          photoURL: currentUser.photoURL,
+          role: isAdmin ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
+          isAdmin
+        }
+        set({ user: userObj, isAuthLoading: false })
+        // Save user profile in Firestore
+        firestoreService.saveUserProfile(userObj)
       } else {
         set({
           user: {
@@ -50,7 +54,8 @@ export const useAuthStore = create((set) => ({
             displayName: 'Agent User',
             photoURL: null,
             role: 'Senior Task Analyst',
-            isGuest: true
+            isGuest: true,
+            isAdmin: false
           },
           isAuthLoading: false
         })
@@ -61,7 +66,20 @@ export const useAuthStore = create((set) => ({
   },
 
   loginWithEmail: async (email, password) => {
-    if (!isFirebaseConfigured || !auth) return { success: true }
+    if (!isFirebaseConfigured || !auth) {
+      const isAdmin = email === 'jeevajeevanandham30@gmail.com'
+      set({
+        user: {
+          uid: isAdmin ? 'tma-admin-jeeva' : 'tma-agent-007',
+          email,
+          displayName: email.split('@')[0],
+          role: isAdmin ? 'Master Timeline Commander (Admin)' : 'TMA Agent',
+          isAdmin,
+          isGuest: false
+        }
+      })
+      return { success: true }
+    }
     try {
       await signInWithEmailAndPassword(auth, email, password)
       return { success: true }
@@ -101,7 +119,8 @@ export const useAuthStore = create((set) => ({
         displayName: 'Guest Agent',
         photoURL: null,
         role: 'Guest Agent',
-        isGuest: true
+        isGuest: true,
+        isAdmin: false
       }
     })
   }
