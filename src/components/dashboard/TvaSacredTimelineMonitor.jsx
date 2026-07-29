@@ -86,9 +86,9 @@ export function TvaSacredTimelineMonitor({ onSelectAgent }) {
     const key = userId || userEmail
     if (key && key !== 'agent-user' && userEmail !== 'agent@tma.org' && !userMap.has(key)) {
       const colors = ['#3B82F6', '#10B981', '#A855F7', '#F97316', '#EC4899', '#06B6D4', '#EAB308']
-      const name = (e.userName && e.userName !== 'Agent User') 
+      const name = (e.userName && e.userName !== 'Agent User' && e.userName !== 'TMA Agent') 
         ? e.userName 
-        : (e.displayName && e.displayName !== 'Agent User')
+        : (e.displayName && e.displayName !== 'Agent User' && e.displayName !== 'TMA Agent')
         ? e.displayName
         : (userEmail ? userEmail.split('@')[0] : 'TMA Agent')
 
