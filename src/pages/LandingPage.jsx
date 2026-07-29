@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { 
-  Sparkles, Clock, Zap, Shield, FileText, Mic, ArrowRight, Play, Flame, Lock, Terminal 
+  Sparkles, Clock, Zap, Shield, FileText, Mic, ArrowRight, Play, Flame, Lock, Terminal, Github, ExternalLink 
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { MadameMinuteLogo } from '../components/common/MadameMinuteLogo'
@@ -56,166 +56,197 @@ export function LandingPage({ onEnterApp }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#141414] text-zinc-200 font-mono relative overflow-hidden select-none">
-      {/* Retro CRT Scanlines & Screen Vignette */}
-      <ScanlineOverlay />
+    <div className="min-h-screen bg-[#141414] text-zinc-200 font-mono relative overflow-hidden select-none flex flex-col justify-between">
+      <div>
+        {/* Retro CRT Scanlines & Screen Vignette */}
+        <ScanlineOverlay />
 
-      {/* Ambient Retro Glow Orbs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-amber-500/10 rounded-full blur-[140px] pointer-events-none animate-crt-glow" />
+        {/* Ambient Retro Glow Orbs */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-amber-500/10 rounded-full blur-[140px] pointer-events-none animate-crt-glow" />
 
-      {/* Top Navigation */}
-      <nav className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between relative z-10 border-b border-zinc-800/80">
-        <div className="flex items-center gap-3">
-          <MadameMinuteLogo size={48} />
-          <div>
-            <span className="text-xl font-black text-amber-500 tracking-wider block leading-none">
-              <HyperText text="MADAME MINUTE" />
-            </span>
-            <span className="text-[10px] text-zinc-500 tracking-widest font-bold">EVERY MINUTE MATTERS • TASK MANAGEMENT ASSOCIATION</span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => { setShowAuthModal(true); setIsLogin(true) }}
-            className="text-xs text-amber-400 hover:text-amber-300 transition-colors font-bold px-3 py-2 cursor-pointer"
-          >
-            Agent Sign In
-          </button>
-          <button
-            onClick={() => { setShowAuthModal(true); setIsLogin(true) }}
-            className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center gap-2 cursor-pointer"
-          >
-            <span>Enter TMA Command Center</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="max-w-5xl mx-auto px-6 pt-16 pb-16 text-center relative z-10 space-y-6">
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold shadow-[0_0_15px_rgba(245,158,11,0.2)]"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>TASK MANAGEMENT ASSOCIATION ENTERPRISE PLATFORM</span>
-        </motion.div>
-
-        <h1 className="text-4xl sm:text-6xl font-black text-amber-500 tracking-tight leading-tight uppercase drop-shadow-[0_0_30px_rgba(245,158,11,0.4)]">
-          <HyperText text="Master Your Work Timeline." /><br />
-          <span className="text-zinc-100"><HyperText text="Replace Excel Forever." delay={400} /></span>
-        </h1>
-
-        <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-400 leading-relaxed font-sans">
-          Madame Minute combines interactive 24h timeline dragging, AI task rewriting, voice dictation, and manager PDF reports into a state-of-the-art work journal.
-        </p>
-
-        <div className="flex items-center justify-center gap-4 pt-4">
-          <button
-            onClick={() => { setShowAuthModal(true); setIsLogin(true) }}
-            className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm rounded-xl shadow-[0_0_30px_rgba(245,158,11,0.5)] transition-all flex items-center gap-3 transform hover:scale-105 cursor-pointer"
-          >
-            <Play className="w-5 h-5 fill-current" />
-            <span>LAUNCH MADAME MINUTE APP</span>
-          </button>
-          <button
-            onClick={() => { setShowAuthModal(true); setIsLogin(false) }}
-            className="px-6 py-4 bg-zinc-900 border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 font-bold text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer"
-          >
-            <Lock className="w-4 h-4" />
-            <span>Issue Agent Credentials</span>
-          </button>
-        </div>
-      </section>
-
-      {/* Interactive AI Scrambler Live Demo Showcase Card */}
-      <section className="max-w-5xl mx-auto px-6 pb-16 relative z-10">
-        <div className="bg-[#1E1E1E] border border-amber-500/40 rounded-2xl p-6 shadow-[0_0_30px_rgba(245,158,11,0.15)] relative overflow-hidden">
-          <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-4">
-            <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-amber-500" />
-              <span className="text-xs font-bold text-amber-500 uppercase">TRY LIVE AI DESCRIPTION REWRITE ENGINE</span>
-            </div>
-            <span className="text-[10px] text-zinc-500 uppercase">INTERACTIVE PREVIEW</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-            <div className="md:col-span-5 space-y-2">
-              <label className="text-xs text-zinc-400 block font-bold">RAW TASK NOTE</label>
-              <input
-                type="text"
-                value={aiDemoNote}
-                onChange={(e) => setAiDemoNote(e.target.value)}
-                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none"
-              />
-              <button
-                onClick={handleRunAiDemo}
-                disabled={isRewritingDemo}
-                className="w-full py-2 bg-orange-500/20 border border-orange-500/40 text-orange-400 hover:bg-orange-500 hover:text-black font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{isRewritingDemo ? 'Enhancing note...' : 'Transform Note to Executive Log'}</span>
-              </button>
-            </div>
-
-            <div className="md:col-span-7 p-4 bg-[#141414] border border-amber-500/30 rounded-xl">
-              <span className="text-[10px] text-zinc-500 uppercase block mb-1">ENHANCED EXECUTIVE DESCRIPTION:</span>
-              <p className="text-xs text-amber-300 font-sans leading-relaxed">{aiDemoResult}</p>
+        {/* Top Navigation */}
+        <nav className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between relative z-10 border-b border-zinc-800/80">
+          <div className="flex items-center gap-3">
+            <MadameMinuteLogo size={48} />
+            <div>
+              <span className="text-xl font-black text-amber-500 tracking-wider block leading-none">
+                <HyperText text="MADAME MINUTE" />
+              </span>
+              <span className="text-[10px] text-zinc-500 tracking-widest font-bold">EVERY MINUTE MATTERS • TASK MANAGEMENT ASSOCIATION</span>
             </div>
           </div>
-        </div>
-      </section>
 
-      {/* Feature Showcase Grid */}
-      <section className="max-w-7xl mx-auto px-6 py-16 border-t border-zinc-800 relative z-10">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl font-bold text-amber-400 uppercase tracking-wider">
-            <HyperText text="ENTERPRISE CHRONO FEATURES" delay={600} />
-          </h2>
-          <p className="text-xs text-zinc-500 mt-1">Engineered for speed, precision, and executive presentation</p>
-        </div>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => { setShowAuthModal(true); setIsLogin(true) }}
+              className="text-xs text-amber-400 hover:text-amber-300 transition-colors font-bold px-3 py-2 cursor-pointer"
+            >
+              Agent Sign In
+            </button>
+            <button
+              onClick={() => { setShowAuthModal(true); setIsLogin(true) }}
+              className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <span>Enter TMA Command Center</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </nav>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <ElaborateFeatureCard
-            icon={Clock}
-            title="Visual Timeline Editor"
-            description="Drag and drop visual blocks across a 24-hour daily timeline grid instead of typing start and end times manually."
-            badge="INTERACTIVE 24H GRID"
-          />
-          <ElaborateFeatureCard
-            icon={Sparkles}
-            title="AI Task Rewriter"
-            description="Transform brief bullet notes like 'fixed bug' into executive descriptions ready for manager timesheet review."
-            badge="LLM ENHANCER"
-          />
-          <ElaborateFeatureCard
-            icon={Mic}
-            title="Voice Journal Dictation"
-            description="Hands-free work journaling using native Web Speech API with audio indicators."
-            badge="SPEECH RECOGNITION"
-          />
-          <ElaborateFeatureCard
-            icon={FileText}
-            title="Executive PDF Reports"
-            description="Generate branded PDF reports with single-day or multi-day date ranges and official approval stamps."
-            badge="EXECUTIVE PDF"
-          />
-          <ElaborateFeatureCard
-            icon={Flame}
-            title="Activity Heatmap & Streaks"
-            description="Track your daily work consistency with GitHub-style green/amber heatmap grids and streak counters."
-            badge="STREAK METRICS"
-          />
-          <ElaborateFeatureCard
-            icon={Shield}
-            title="Offline-First Vault Sync"
-            description="Works 100% offline with Zustand local storage and syncs seamlessly with Firebase Firestore when connected."
-            badge="HYBRID OFFLINE"
-          />
+        {/* Hero Section */}
+        <section className="max-w-5xl mx-auto px-6 pt-16 pb-16 text-center relative z-10 space-y-6">
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold shadow-[0_0_15px_rgba(245,158,11,0.2)]"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>TASK MANAGEMENT ASSOCIATION ENTERPRISE PLATFORM</span>
+          </motion.div>
+
+          <h1 className="text-4xl sm:text-6xl font-black text-amber-500 tracking-tight leading-tight uppercase drop-shadow-[0_0_30px_rgba(245,158,11,0.4)]">
+            <HyperText text="Master Your Work Timeline." /><br />
+            <span className="text-zinc-100"><HyperText text="Replace Excel Forever." delay={400} /></span>
+          </h1>
+
+          <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-400 leading-relaxed font-sans">
+            Madame Minute combines interactive 24h timeline dragging, AI task rewriting, voice dictation, and manager PDF reports into a state-of-the-art work journal.
+          </p>
+
+          <div className="flex items-center justify-center gap-4 pt-4">
+            <button
+              onClick={() => { setShowAuthModal(true); setIsLogin(true) }}
+              className="px-8 py-4 bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-sm rounded-xl shadow-[0_0_30px_rgba(245,158,11,0.5)] transition-all flex items-center gap-3 transform hover:scale-105 cursor-pointer"
+            >
+              <Play className="w-5 h-5 fill-current" />
+              <span>LAUNCH MADAME MINUTE APP</span>
+            </button>
+            <button
+              onClick={() => { setShowAuthModal(true); setIsLogin(false) }}
+              className="px-6 py-4 bg-zinc-900 border border-amber-500/40 text-amber-300 hover:bg-amber-500/10 font-bold text-sm rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+            >
+              <Lock className="w-4 h-4" />
+              <span>Issue Agent Credentials</span>
+            </button>
+          </div>
+        </section>
+
+        {/* Interactive AI Scrambler Live Demo Showcase Card */}
+        <section className="max-w-5xl mx-auto px-6 pb-16 relative z-10">
+          <div className="bg-[#1E1E1E] border border-amber-500/40 rounded-2xl p-6 shadow-[0_0_30px_rgba(245,158,11,0.15)] relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-4 mb-4">
+              <div className="flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-amber-500" />
+                <span className="text-xs font-bold text-amber-500 uppercase">TRY LIVE AI DESCRIPTION REWRITE ENGINE</span>
+              </div>
+              <span className="text-[10px] text-zinc-500 uppercase">INTERACTIVE PREVIEW</span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+              <div className="md:col-span-5 space-y-2">
+                <label className="text-xs text-zinc-400 block font-bold">RAW TASK NOTE</label>
+                <input
+                  type="text"
+                  value={aiDemoNote}
+                  onChange={(e) => setAiDemoNote(e.target.value)}
+                  className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none"
+                />
+                <button
+                  onClick={handleRunAiDemo}
+                  disabled={isRewritingDemo}
+                  className="w-full py-2 bg-orange-500/20 border border-orange-500/40 text-orange-400 hover:bg-orange-500 hover:text-black font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>{isRewritingDemo ? 'Enhancing note...' : 'Transform Note to Executive Log'}</span>
+                </button>
+              </div>
+
+              <div className="md:col-span-7 p-4 bg-[#141414] border border-amber-500/30 rounded-xl">
+                <span className="text-[10px] text-zinc-500 uppercase block mb-1">ENHANCED EXECUTIVE DESCRIPTION:</span>
+                <p className="text-xs text-amber-300 font-sans leading-relaxed">{aiDemoResult}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Feature Showcase Grid */}
+        <section className="max-w-7xl mx-auto px-6 py-16 border-t border-zinc-800 relative z-10">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl font-bold text-amber-400 uppercase tracking-wider">
+              <HyperText text="ENTERPRISE CHRONO FEATURES" delay={600} />
+            </h2>
+            <p className="text-xs text-zinc-500 mt-1">Engineered for speed, precision, and executive presentation</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <ElaborateFeatureCard
+              icon={Clock}
+              title="Visual Timeline Editor"
+              description="Drag and drop visual blocks across a 24-hour daily timeline grid instead of typing start and end times manually."
+              badge="INTERACTIVE 24H GRID"
+            />
+            <ElaborateFeatureCard
+              icon={Sparkles}
+              title="AI Task Rewriter"
+              description="Transform brief bullet notes like 'fixed bug' into executive descriptions ready for manager timesheet review."
+              badge="LLM ENHANCER"
+            />
+            <ElaborateFeatureCard
+              icon={Mic}
+              title="Voice Journal Dictation"
+              description="Hands-free work journaling using native Web Speech API with audio indicators."
+              badge="SPEECH RECOGNITION"
+            />
+            <ElaborateFeatureCard
+              icon={FileText}
+              title="Executive PDF Reports"
+              description="Generate branded PDF reports with single-day or multi-day date ranges and official approval stamps."
+              badge="EXECUTIVE PDF"
+            />
+            <ElaborateFeatureCard
+              icon={Flame}
+              title="Activity Heatmap & Streaks"
+              description="Track your daily work consistency with GitHub-style green/amber heatmap grids and streak counters."
+              badge="STREAK METRICS"
+            />
+            <ElaborateFeatureCard
+              icon={Shield}
+              title="Offline-First Vault Sync"
+              description="Works 100% offline with Zustand local storage and syncs seamlessly with Firebase Firestore when connected."
+              badge="HYBRID OFFLINE"
+            />
+          </div>
+        </section>
+      </div>
+
+      {/* Landing Page Footer with 100% Free Disclaimer & Developer Github Link */}
+      <footer className="border-t border-zinc-800 bg-[#1E1E1E]/90 backdrop-blur-md py-6 px-6 relative z-10 font-mono mt-12">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+          <div className="flex items-center gap-3">
+            <MadameMinuteLogo size={36} />
+            <div>
+              <span className="text-sm font-bold text-amber-500 block">MADAME MINUTE</span>
+              <p className="text-[11px] text-zinc-400 font-sans">
+                All features, code, and words are 100% Free to Use & Open Source.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-3 text-xs">
+            <span className="text-zinc-400">Created & Developed by</span>
+            <a
+              href="https://github.com/jeevanandham5"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold hover:bg-amber-500 hover:text-black transition-all shadow-[0_0_15px_rgba(245,158,11,0.2)] group"
+            >
+              <Github className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              <span>@jeevanandham5</span>
+              <ExternalLink className="w-3 h-3 opacity-70" />
+            </a>
+          </div>
         </div>
-      </section>
+      </footer>
 
       {/* Authentication Modal */}
       {showAuthModal && (
