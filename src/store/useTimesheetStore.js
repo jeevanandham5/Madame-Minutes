@@ -57,8 +57,24 @@ const INITIAL_ENTRIES = [
     hours: 7.0,
     tags: ['Security', 'Audit'],
     createdAt: new Date().toISOString()
+  },
+  {
+    id: 'tva-entry-holiday-1',
+    date: dayjs().subtract(3, 'day').format('YYYY-MM-DD'),
+    project: 'Sacred Recess',
+    taskTitle: 'Official Public Holiday - Sacred Timeline Recess',
+    description: 'TVA Official Organization Holiday. All variant temporal logs paused for Sacred Recess celebration.',
+    status: 'Holiday',
+    isHoliday: true,
+    entryType: 'holiday',
+    startTime: '00:00',
+    endTime: '23:59',
+    hours: 8.0,
+    tags: ['Holiday', 'Recess'],
+    createdAt: new Date().toISOString()
   }
 ]
+
 
 export const useTimesheetStore = create(
   persist(

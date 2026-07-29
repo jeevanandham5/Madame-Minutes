@@ -1,17 +1,27 @@
 import React, { useState, useEffect } from 'react'
-import { X, Check, Sparkles, Mic, Clock } from 'lucide-react'
+import { X, Check, Sparkles, Mic, Clock, Palmtree, Briefcase, Tag } from 'lucide-react'
 import { useTimesheetStore } from '../../store/useTimesheetStore'
 import { useProjectStore } from '../../store/useProjectStore'
 import { rewriteTaskDescription } from '../../utils/aiRewriter'
 import { calculateHours } from '../../utils/dateUtils'
-import { playTvaSuccess, playTvaChirp } from '../../utils/tvaAudio'
+import { playTvaSuccess, playTvaChirp, playTvaClick } from '../../utils/tvaAudio'
 import { toast } from 'sonner'
 import dayjs from 'dayjs'
+
+const TASK_PRESETS = [
+  { label: 'Morning Standup', text: 'Morning Standup Meeting' },
+  { label: 'Evening Wrap-up', text: 'Evening Wrap-up & Daily Sync' },
+  { label: 'Code Review', text: 'Code Review & Pull Request Inspection' },
+  { label: 'Bug Fixes', text: 'Critical Bug Fixes & Debugging' },
+  { label: 'Documentation', text: 'Technical Documentation & Planning' },
+  { label: 'Deployment', text: 'Production Deployment & Monitoring' }
+]
 
 export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTitle = '' }) {
   const { addEntry } = useTimesheetStore()
   const { projects } = useProjectStore()
 
+  const [entryType, setEntryType] = useState('work') // 'work' | 'holiday'
   const [taskTitle, setTaskTitle] = useState(initialTaskTitle)
   const [project, setProject] = useState(projects[0]?.name || 'TVA Core / Nexus')
   const [description, setDescription] = useState('')
@@ -31,7 +41,32 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
 
   if (!isOpen) return null
 
-  const computedHours = calculateHours(startTime, endTime, breakMinutes)
+  const computedHours = entryType === 'holiday' ? 8.0 : calculateHours(startTime, endTime, breakMinutes)
+
+  const handleSelectEntryType = (type) => {
+    setEntryType(type)
+    if (type === 'holiday') {
+      if (!taskTitle || taskTitle.trim() === '') {
+        setTaskTitle('Official Public Holiday - Sacred Recess')
+      }
+      setProject('Sacred Recess')
+      setStatus('Holiday')
+      setTagInput('Holiday, Recess')
+    } else {
+      if (taskTitle === 'Official Public Holiday - Sacred Recess') {
+        setTaskTitle('')
+      }
+      setProject(projects[0]?.name || 'TVA Core / Nexus')
+      setStatus('Completed')
+      setTagInput('Frontend, TVA')
+    }
+  }
+
+  const handleSelectPreset = (text) => {
+    setTaskTitle(text)
+    playTvaClick()
+    toast.info(`Selected task preset: "${text}"`)
+  }
 
   const handleAiEnhance = () => {
     if (!taskTitle.trim()) {
@@ -45,7 +80,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
       setTaskTitle(rewritten)
       setIsAiRewriting(false)
       playTvaSuccess()
-      toast.success('🤖 AI Enhanced task description!')
+      toast.success('AI Enhanced task description!')
     }, 400)
   }
 
@@ -54,21 +89,24 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
     if (!taskTitle.trim()) return
 
     const tags = tagInput.split(',').map(t => t.trim()).filter(Boolean)
+    const isHoliday = entryType === 'holiday'
 
     addEntry({
       date,
-      project,
+      project: isHoliday ? 'Sacred Recess' : project,
       taskTitle: taskTitle.trim(),
-      description: description.trim(),
-      status,
-      startTime,
-      endTime,
+      description: description.trim() || (isHoliday ? 'Official TVA Organization Holiday & Sacred Recess Day.' : ''),
+      status: isHoliday ? 'Holiday' : status,
+      isHoliday,
+      entryType,
+      startTime: isHoliday ? '00:00' : startTime,
+      endTime: isHoliday ? '23:59' : endTime,
       hours: computedHours,
       tags
     })
 
     playTvaSuccess()
-    toast.success('Journal entry logged successfully!')
+    toast.success(isHoliday ? 'Holiday / Sacred Recess logged!' : 'Journal entry logged successfully!')
     onClose()
   }
 
@@ -88,21 +126,52 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-lg font-bold text-amber-400">LOG TIME ENTRY</h2>
-            <p className="text-xs text-zinc-400">Record a new temporal task into Madame Minute journal.</p>
+            <h2 className="text-lg font-bold text-amber-400">LOG TIME / HOLIDAY ENTRY</h2>
+            <p className="text-xs text-zinc-400">Record a new temporal task or official holiday into Madame Minute journal.</p>
           </div>
+        </div>
+
+        {/* Entry Category Selector: Standard Task vs Official Holiday */}
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <button
+            type="button"
+            onClick={() => handleSelectEntryType('work')}
+            className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              entryType === 'work'
+                ? 'bg-amber-500 text-black border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                : 'bg-[#141414] text-zinc-400 border-zinc-800 hover:border-zinc-700'
+            }`}
+          >
+            <Briefcase className="w-4 h-4" />
+            <span>STANDARD WORK TASK</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleSelectEntryType('holiday')}
+            className={`p-3 rounded-xl border text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              entryType === 'holiday'
+                ? 'bg-purple-600 text-white border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]'
+                : 'bg-[#141414] text-purple-400 border-purple-500/30 hover:border-purple-500/60'
+            }`}
+          >
+            <Palmtree className="w-4 h-4" />
+            <span>OFFICIAL HOLIDAY / PTO</span>
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Task Title with Mic & AI Buttons inside Input */}
           <div>
-            <label className="text-xs text-zinc-400 font-bold block mb-1">TASK OBJECTIVE *</label>
-            <div className="relative">
+            <label className="text-xs text-zinc-400 font-bold block mb-1">
+              {entryType === 'holiday' ? 'HOLIDAY / RECESS NAME *' : 'TASK OBJECTIVE *'}
+            </label>
+            <div className="relative mb-2">
               <input
                 type="text"
                 value={taskTitle}
                 onChange={(e) => setTaskTitle(e.target.value)}
-                placeholder="e.g. Fixed bug in user login auth flow"
+                placeholder={entryType === 'holiday' ? 'e.g. Official Public Holiday / PTO Recess' : 'e.g. Fixed bug in user login auth flow'}
                 className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg pl-3 pr-28 py-2.5 text-sm text-amber-200 placeholder-zinc-600 focus:outline-none transition-colors"
                 required
                 autoFocus
@@ -122,7 +191,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
                   type="button"
                   onClick={handleAiEnhance}
                   disabled={isAiRewriting}
-                  title="🤖 AI Description Rewrite"
+                  title="AI Description Rewrite"
                   className="px-2 py-1 rounded-md bg-orange-500/10 hover:bg-orange-500 hover:text-black border border-orange-500/30 text-orange-400 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <Sparkles className="w-3 h-3" />
@@ -130,6 +199,26 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
                 </button>
               </div>
             </div>
+
+            {/* Quick Preset Tags Pills */}
+            {entryType === 'work' && (
+              <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                <span className="text-[10px] text-zinc-500 font-bold uppercase flex items-center gap-1 mr-1">
+                  <Tag className="w-3 h-3 text-amber-500" />
+                  <span>PRESETS:</span>
+                </span>
+                {TASK_PRESETS.map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    onClick={() => handleSelectPreset(preset.text)}
+                    className="px-2.5 py-1 rounded-md bg-[#141414] hover:bg-amber-500/20 border border-zinc-800 hover:border-amber-500/50 text-amber-400 text-[10px] font-bold transition-all cursor-pointer"
+                  >
+                    + {preset.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Project & Status Row */}
@@ -138,12 +227,17 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
               <label className="text-xs text-zinc-400 font-bold block mb-1">PROJECT REGISTRY</label>
               <select
                 value={project}
+                disabled={entryType === 'holiday'}
                 onChange={(e) => setProject(e.target.value)}
-                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none"
+                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none disabled:opacity-60"
               >
-                {projects.map(p => (
-                  <option key={p.id} value={p.name}>{p.name}</option>
-                ))}
+                {entryType === 'holiday' ? (
+                  <option value="Sacred Recess">Sacred Recess (Holiday)</option>
+                ) : (
+                  projects.map(p => (
+                    <option key={p.id} value={p.name}>{p.name}</option>
+                  ))
+                )}
               </select>
             </div>
 
@@ -151,12 +245,19 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
               <label className="text-xs text-zinc-400 font-bold block mb-1">STATUS</label>
               <select
                 value={status}
+                disabled={entryType === 'holiday'}
                 onChange={(e) => setStatus(e.target.value)}
-                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none"
+                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none disabled:opacity-60"
               >
-                <option value="Completed">Completed</option>
-                <option value="In Progress">In Progress</option>
-                <option value="Logged">Logged</option>
+                {entryType === 'holiday' ? (
+                  <option value="Holiday">Holiday / PTO</option>
+                ) : (
+                  <>
+                    <option value="Completed">Completed</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Logged">Logged</option>
+                  </>
+                )}
               </select>
             </div>
           </div>
@@ -164,7 +265,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
           {/* Date & Time Row */}
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="text-xs text-zinc-400 font-bold block mb-1">DATE</label>
+              <label className="text-xs text-zinc-400 font-bold block mb-1 font-mono">DATE</label>
               <input
                 type="date"
                 value={date}
@@ -177,8 +278,9 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
               <input
                 type="time"
                 value={startTime}
+                disabled={entryType === 'holiday'}
                 onChange={(e) => setStartTime(e.target.value)}
-                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 focus:outline-none"
+                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 focus:outline-none disabled:opacity-50"
               />
             </div>
             <div>
@@ -186,16 +288,23 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
               <input
                 type="time"
                 value={endTime}
+                disabled={entryType === 'holiday'}
                 onChange={(e) => setEndTime(e.target.value)}
-                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 focus:outline-none"
+                className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-2.5 py-1.5 text-xs text-amber-300 focus:outline-none disabled:opacity-50"
               />
             </div>
           </div>
 
           {/* Computed Hours Display */}
-          <div className="p-3 bg-[#141414] border border-amber-500/20 rounded-lg flex items-center justify-between text-xs">
-            <span className="text-zinc-400">Calculated Net Duration:</span>
-            <strong className="text-amber-400 text-sm font-bold">{computedHours} Hours</strong>
+          <div className={`p-3 rounded-lg flex items-center justify-between text-xs border ${
+            entryType === 'holiday' 
+              ? 'bg-purple-950/30 border-purple-500/40 text-purple-300' 
+              : 'bg-[#141414] border-amber-500/20 text-zinc-400'
+          }`}>
+            <span>{entryType === 'holiday' ? 'Holiday Duration Credit:' : 'Calculated Net Duration:'}</span>
+            <strong className={`text-sm font-bold ${entryType === 'holiday' ? 'text-purple-300' : 'text-amber-400'}`}>
+              {computedHours} Hours ({entryType === 'holiday' ? 'Paid Recess' : 'Work'})
+            </strong>
           </div>
 
           {/* Description Notes */}
@@ -204,7 +313,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Add technical context or execution logs for future reference..."
+              placeholder={entryType === 'holiday' ? 'Details about this official holiday or paid time off...' : 'Add technical context or execution logs for future reference...'}
               rows={2}
               className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-200 placeholder-zinc-600 focus:outline-none"
             />
@@ -221,10 +330,14 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
             </button>
             <button
               type="submit"
-              className="px-5 py-2 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black rounded-lg transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.3)] cursor-pointer"
+              className={`px-5 py-2 text-xs font-bold rounded-lg transition-all flex items-center gap-2 cursor-pointer ${
+                entryType === 'holiday'
+                  ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-[0_0_20px_rgba(168,85,247,0.4)]'
+                  : 'bg-amber-500 hover:bg-amber-400 text-black shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+              }`}
             >
               <Check className="w-4 h-4" />
-              <span>Save Entry</span>
+              <span>{entryType === 'holiday' ? 'Save Holiday Entry' : 'Save Work Entry'}</span>
             </button>
           </div>
         </form>

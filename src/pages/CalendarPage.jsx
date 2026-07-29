@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Palmtree } from 'lucide-react'
 import dayjs from 'dayjs'
 import { useTimesheetStore } from '../store/useTimesheetStore'
 
@@ -31,7 +31,7 @@ export function CalendarPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCurrentMonth(currentMonth.subtract(1, 'month'))}
-            className="p-2 bg-[#141414] border border-zinc-800 hover:border-amber-500 text-amber-400 rounded-lg"
+            className="p-2 bg-[#141414] border border-zinc-800 hover:border-amber-500 text-amber-400 rounded-lg cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -40,7 +40,7 @@ export function CalendarPage() {
           </span>
           <button
             onClick={() => setCurrentMonth(currentMonth.add(1, 'month'))}
-            className="p-2 bg-[#141414] border border-zinc-800 hover:border-amber-500 text-amber-400 rounded-lg"
+            className="p-2 bg-[#141414] border border-zinc-800 hover:border-amber-500 text-amber-400 rounded-lg cursor-pointer"
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -63,19 +63,29 @@ export function CalendarPage() {
             const dayEntries = entries.filter(e => dayjs(e.date).format('YYYY-MM-DD') === dateStr)
             const totalHours = dayEntries.reduce((sum, e) => sum + (parseFloat(e.hours) || 0), 0)
             const isToday = dateObj.isSame(dayjs(), 'day')
+            const hasHoliday = dayEntries.some(e => e.isHoliday || e.status === 'Holiday' || e.project === 'Sacred Recess')
 
             return (
               <div
                 key={dateStr}
                 className={`h-28 p-2 bg-[#141414] border rounded-lg flex flex-col justify-between transition-all hover:border-amber-500 ${
-                  isToday ? 'border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'border-zinc-800'
+                  hasHoliday 
+                    ? 'border-purple-500/60 bg-purple-950/20 shadow-[0_0_10px_rgba(168,85,247,0.2)]' 
+                    : isToday 
+                    ? 'border-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.2)]' 
+                    : 'border-zinc-800'
                 }`}
               >
                 <div className="flex items-center justify-between text-xs">
-                  <span className={`font-bold ${isToday ? 'text-amber-400' : 'text-zinc-400'}`}>
+                  <span className={`font-bold ${hasHoliday ? 'text-purple-300' : isToday ? 'text-amber-400' : 'text-zinc-400'}`}>
                     {dateObj.format('D')}
                   </span>
-                  {totalHours > 0 && (
+                  {hasHoliday ? (
+                    <span className="px-1.5 py-0.5 rounded text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold flex items-center gap-0.5">
+                      <Palmtree className="w-2.5 h-2.5" />
+                      <span>HOLIDAY</span>
+                    </span>
+                  ) : totalHours > 0 && (
                     <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-500/20 text-amber-400 font-bold">
                       {totalHours}h
                     </span>
@@ -83,11 +93,19 @@ export function CalendarPage() {
                 </div>
 
                 <div className="space-y-1 overflow-y-auto">
-                  {dayEntries.slice(0, 2).map(e => (
-                    <div key={e.id} className="text-[10px] p-1 rounded bg-zinc-800 text-amber-300 truncate">
-                      {e.taskTitle}
-                    </div>
-                  ))}
+                  {dayEntries.slice(0, 2).map(e => {
+                    const isHolidayEntry = e.isHoliday || e.status === 'Holiday'
+                    return (
+                      <div 
+                        key={e.id} 
+                        className={`text-[10px] p-1 rounded truncate font-medium ${
+                          isHolidayEntry ? 'bg-purple-900/40 text-purple-200 border border-purple-500/30' : 'bg-zinc-800 text-amber-300'
+                        }`}
+                      >
+                        {e.taskTitle}
+                      </div>
+                    )
+                  })}
                   {dayEntries.length > 2 && (
                     <div className="text-[9px] text-zinc-500 font-medium">
                       +{dayEntries.length - 2} more

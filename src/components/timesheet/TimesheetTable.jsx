@@ -213,11 +213,14 @@ export function TimesheetTable({ onOpenAddModal }) {
                 filtered.map((item) => {
                   const isSelected = selectedIds.includes(item.id)
                   const isEditingTask = editingCell?.id === item.id && editingCell?.field === 'taskTitle'
+                  const isHoliday = item.isHoliday || item.status === 'Holiday' || item.project === 'Sacred Recess'
 
                   return (
                     <tr 
                       key={item.id}
-                      className={`hover:bg-zinc-800/40 transition-colors ${isSelected ? 'bg-amber-500/10' : ''}`}
+                      className={`hover:bg-zinc-800/40 transition-colors ${
+                        isHoliday ? 'bg-purple-950/20 border-l-2 border-l-purple-500' : isSelected ? 'bg-amber-500/10' : ''
+                      }`}
                     >
                       {/* Checkbox */}
                       <td className="p-3 text-center">
@@ -236,9 +239,16 @@ export function TimesheetTable({ onOpenAddModal }) {
 
                       {/* Project Tag */}
                       <td className="p-3 whitespace-nowrap">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
-                          {item.project}
-                        </span>
+                        {isHoliday ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-bold bg-purple-900/40 text-purple-300 border border-purple-500/40">
+                            <Palmtree className="w-3 h-3 text-purple-400" />
+                            <span>{item.project}</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30">
+                            {item.project}
+                          </span>
+                        )}
                       </td>
 
                       {/* Task Title (Inline Edit + AI Rewrite) */}
@@ -269,18 +279,20 @@ export function TimesheetTable({ onOpenAddModal }) {
                           <div className="flex items-center justify-between group">
                             <span 
                               onDoubleClick={() => handleStartCellEdit(item.id, 'taskTitle', item.taskTitle)}
-                              className="font-semibold text-zinc-200 group-hover:text-amber-300 cursor-pointer"
+                              className={`font-semibold cursor-pointer ${isHoliday ? 'text-purple-200' : 'text-zinc-200 group-hover:text-amber-300'}`}
                               title="Double click to inline edit"
                             >
                               {item.taskTitle}
                             </span>
-                            <button
-                              onClick={() => handleAiRewriteCell(item.id, item.taskTitle, item.project)}
-                              title="🤖 AI Rewrite task description"
-                              className="opacity-0 group-hover:opacity-100 p-1 text-amber-400 hover:scale-110 transition-all"
-                            >
-                              <Sparkles className="w-3.5 h-3.5" />
-                            </button>
+                            {!isHoliday && (
+                              <button
+                                onClick={() => handleAiRewriteCell(item.id, item.taskTitle, item.project)}
+                                title="AI Rewrite task description"
+                                className="opacity-0 group-hover:opacity-100 p-1 text-amber-400 hover:scale-110 transition-all"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                              </button>
+                            )}
                           </div>
                         )}
                       </td>
@@ -292,13 +304,20 @@ export function TimesheetTable({ onOpenAddModal }) {
 
                       {/* Status Pill */}
                       <td className="p-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                          item.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                          item.status === 'In Progress' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                          'bg-zinc-800 text-zinc-400 border border-zinc-700'
-                        }`}>
-                          {item.status}
-                        </span>
+                        {isHoliday ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                            <Palmtree className="w-3 h-3" />
+                            <span>HOLIDAY RECESS</span>
+                          </span>
+                        ) : (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                            item.status === 'Completed' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
+                            item.status === 'In Progress' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                            'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                          }`}>
+                            {item.status}
+                          </span>
+                        )}
                       </td>
 
                       {/* Time Range */}
