@@ -27,6 +27,7 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@rolldown/binding-darwin-arm64": "^1.1.5",
     "@vitejs/plugin-react": "latest"
   }
 }

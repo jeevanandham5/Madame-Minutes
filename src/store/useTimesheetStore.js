@@ -93,6 +93,14 @@ export const useTimesheetStore = create(
       setSelectedProjectFilter: (proj) => set({ selectedProjectFilter: proj }),
       setSelectedStatusFilter: (status) => set({ selectedStatusFilter: status }),
 
+      syncFirestoreEntries: async (userId) => {
+        if (!userId) return
+        const remoteEntries = await firestoreService.fetchTimesheets(userId)
+        if (remoteEntries && Array.isArray(remoteEntries) && remoteEntries.length > 0) {
+          set({ entries: remoteEntries })
+        }
+      },
+
       addEntry: async (newEntry, userId = null) => {
         const id = 'tma-entry-' + Date.now()
         const entryToAdd = {
@@ -106,41 +114,49 @@ export const useTimesheetStore = create(
         set(state => ({ entries: [entryToAdd, ...state.entries] }))
 
         if (userId) {
-          await firestoreService.addTimesheet(userId, entryToAdd)
+          const docId = await firestoreService.addTimesheet(userId, entryToAdd)
+          if (docId) {
+            set(state => ({
+              entries: state.entries.map(e => e.id === id ? { ...e, docId } : e)
+            }))
+          }
         }
       },
 
       updateEntry: async (id, updates, userId = null) => {
+        const target = get().entries.find(e => e.id === id)
         set(state => ({
           entries: state.entries.map(item => item.id === id ? { ...item, ...updates } : item)
         }))
 
-        if (userId) {
-          await firestoreService.updateTimesheet(id, updates)
+        if (userId && (target?.docId || id)) {
+          await firestoreService.updateTimesheet(target?.docId || id, updates)
         }
       },
 
       deleteEntry: async (id, userId = null) => {
+        const target = get().entries.find(e => e.id === id)
         set(state => ({
           entries: state.entries.filter(item => item.id !== id)
         }))
 
-        if (userId) {
-          await firestoreService.deleteTimesheet(id)
+        if (userId && (target?.docId || id)) {
+          await firestoreService.deleteTimesheet(target?.docId || id)
         }
       },
 
       bulkDelete: async (ids, userId = null) => {
+        const targets = get().entries.filter(e => ids.includes(e.id))
         set(state => ({
           entries: state.entries.filter(item => !ids.includes(item.id))
         }))
 
         if (userId) {
-          ids.forEach(id => firestoreService.deleteTimesheet(id))
+          targets.forEach(t => firestoreService.deleteTimesheet(t.docId || t.id))
         }
       },
 
-      copyYesterdayEntries: () => {
+      copyYesterdayEntries: (userId = null) => {
         const yesterdayStr = dayjs().subtract(1, 'day').format('YYYY-MM-DD')
         const todayStr = dayjs().format('YYYY-MM-DD')
         const yesterdayEntries = get().entries.filter(e => dayjs(e.date).format('YYYY-MM-DD') === yesterdayStr)
@@ -156,6 +172,11 @@ export const useTimesheetStore = create(
         }))
 
         set(state => ({ entries: [...clonedEntries, ...state.entries] }))
+        
+        if (userId) {
+          clonedEntries.forEach(entry => firestoreService.addTimesheet(userId, entry))
+        }
+
         return clonedEntries.length
       },
 

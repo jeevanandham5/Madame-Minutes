@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { 
-  Search, Filter, Plus, Trash2, Download, Copy, Sparkles, Check, X, Edit3, ArrowUpDown, ChevronDown 
+  Search, Filter, Plus, Trash2, Download, Copy, Sparkles, Check, X, Edit3, ArrowUpDown, ChevronDown, Palmtree 
 } from 'lucide-react'
 import { useTimesheetStore } from '../../store/useTimesheetStore'
 import { useProjectStore } from '../../store/useProjectStore'
+import { useAuthStore } from '../../store/useAuthStore'
 import { exportToCSV } from '../../utils/exportUtils'
 import { rewriteTaskDescription } from '../../utils/aiRewriter'
 import { toast } from 'sonner'
@@ -24,6 +25,7 @@ export function TimesheetTable({ onOpenAddModal }) {
   } = useTimesheetStore()
 
   const { projects } = useProjectStore()
+  const { user } = useAuthStore()
 
   const [selectedIds, setSelectedIds] = useState([])
   const [editingCell, setEditingCell] = useState(null) // { id, field }
@@ -59,7 +61,7 @@ export function TimesheetTable({ onOpenAddModal }) {
   }
 
   const handleCopyYesterday = () => {
-    const count = copyYesterdayEntries()
+    const count = copyYesterdayEntries(user?.uid)
     if (count > 0) {
       toast.success(`Copied ${count} entry(ies) from yesterday into today!`)
     } else {
@@ -69,7 +71,7 @@ export function TimesheetTable({ onOpenAddModal }) {
 
   const handleBulkDelete = () => {
     if (!selectedIds.length) return
-    bulkDelete(selectedIds)
+    bulkDelete(selectedIds, user?.uid)
     setSelectedIds([])
     toast.success('Selected entries deleted')
   }
@@ -86,15 +88,15 @@ export function TimesheetTable({ onOpenAddModal }) {
 
   const handleSaveCellEdit = (id, field) => {
     if (!editingCell) return
-    updateEntry(id, { [field]: editValue })
+    updateEntry(id, { [field]: editValue }, user?.uid)
     setEditingCell(null)
     toast.success('Entry updated')
   }
 
   const handleAiRewriteCell = (id, currentTask, project) => {
     const rewritten = rewriteTaskDescription(currentTask, project)
-    updateEntry(id, { taskTitle: rewritten })
-    toast.success('🤖 AI Enhanced task title!')
+    updateEntry(id, { taskTitle: rewritten }, user?.uid)
+    toast.success('AI Enhanced task title!')
   }
 
   return (
@@ -144,7 +146,7 @@ export function TimesheetTable({ onOpenAddModal }) {
           {selectedIds.length > 0 && (
             <button
               onClick={handleBulkDelete}
-              className="px-3 py-2 bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+              className="px-3 py-2 bg-red-500/20 border border-red-500/40 text-red-400 hover:bg-red-500 hover:text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <Trash2 className="w-3.5 h-3.5" />
               <span>Delete ({selectedIds.length})</span>
@@ -154,7 +156,7 @@ export function TimesheetTable({ onOpenAddModal }) {
           <button
             onClick={handleCopyYesterday}
             title="Duplicate yesterday's logged entries into today"
-            className="px-3 py-2 bg-zinc-800 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+            className="px-3 py-2 bg-zinc-800 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Copy className="w-3.5 h-3.5" />
             <span>Copy Yesterday</span>
@@ -162,7 +164,7 @@ export function TimesheetTable({ onOpenAddModal }) {
 
           <button
             onClick={handleExportCSV}
-            className="px-3 py-2 bg-zinc-800 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all"
+            className="px-3 py-2 bg-zinc-800 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>CSV</span>
@@ -170,7 +172,7 @@ export function TimesheetTable({ onOpenAddModal }) {
 
           <button
             onClick={onOpenAddModal}
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+            className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-lg text-xs flex items-center gap-1.5 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)] cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Log Entry</span>
@@ -189,7 +191,7 @@ export function TimesheetTable({ onOpenAddModal }) {
                     type="checkbox"
                     checked={selectedIds.length > 0 && selectedIds.length === filtered.length}
                     onChange={toggleSelectAll}
-                    className="accent-amber-500 rounded"
+                    className="accent-amber-500 rounded cursor-pointer"
                   />
                 </th>
                 <th className="p-3">Date</th>
@@ -213,7 +215,7 @@ export function TimesheetTable({ onOpenAddModal }) {
                 filtered.map((item) => {
                   const isSelected = selectedIds.includes(item.id)
                   const isEditingTask = editingCell?.id === item.id && editingCell?.field === 'taskTitle'
-                  const isHoliday = item.isHoliday || item.status === 'Holiday' || item.project === 'Sacred Recess'
+                  const isHoliday = item.isHoliday || item.status === 'Holiday' || item.project === 'Official Recess'
 
                   return (
                     <tr 
@@ -228,7 +230,7 @@ export function TimesheetTable({ onOpenAddModal }) {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => toggleSelectOne(item.id)}
-                          className="accent-amber-500 rounded"
+                          className="accent-amber-500 rounded cursor-pointer"
                         />
                       </td>
 
@@ -264,13 +266,13 @@ export function TimesheetTable({ onOpenAddModal }) {
                             />
                             <button
                               onClick={() => handleSaveCellEdit(item.id, 'taskTitle')}
-                              className="p-1 text-emerald-400 hover:text-emerald-300"
+                              className="p-1 text-emerald-400 hover:text-emerald-300 cursor-pointer"
                             >
                               <Check className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => setEditingCell(null)}
-                              className="p-1 text-zinc-500 hover:text-zinc-300"
+                              className="p-1 text-zinc-500 hover:text-zinc-300 cursor-pointer"
                             >
                               <X className="w-3.5 h-3.5" />
                             </button>
@@ -288,7 +290,7 @@ export function TimesheetTable({ onOpenAddModal }) {
                               <button
                                 onClick={() => handleAiRewriteCell(item.id, item.taskTitle, item.project)}
                                 title="AI Rewrite task description"
-                                className="opacity-0 group-hover:opacity-100 p-1 text-amber-400 hover:scale-110 transition-all"
+                                className="opacity-0 group-hover:opacity-100 p-1 text-amber-400 hover:scale-110 transition-all cursor-pointer"
                               >
                                 <Sparkles className="w-3.5 h-3.5" />
                               </button>
@@ -333,8 +335,8 @@ export function TimesheetTable({ onOpenAddModal }) {
                       {/* Actions */}
                       <td className="p-3 text-center whitespace-nowrap">
                         <button
-                          onClick={() => deleteEntry(item.id)}
-                          className="p-1.5 text-zinc-500 hover:text-red-400 transition-colors"
+                          onClick={() => deleteEntry(item.id, user?.uid)}
+                          className="p-1.5 text-zinc-500 hover:text-red-400 transition-colors cursor-pointer"
                           title="Delete entry"
                         >
                           <Trash2 className="w-4 h-4" />

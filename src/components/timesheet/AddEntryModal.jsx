@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { X, Check, Sparkles, Mic, Clock, Palmtree, Briefcase, Tag } from 'lucide-react'
 import { useTimesheetStore } from '../../store/useTimesheetStore'
 import { useProjectStore } from '../../store/useProjectStore'
+import { useAuthStore } from '../../store/useAuthStore'
 import { rewriteTaskDescription } from '../../utils/aiRewriter'
 import { calculateHours } from '../../utils/dateUtils'
 import { playTvaSuccess, playTvaChirp, playTvaClick } from '../../utils/tvaAudio'
@@ -20,17 +21,18 @@ const TASK_PRESETS = [
 export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTitle = '' }) {
   const { addEntry } = useTimesheetStore()
   const { projects } = useProjectStore()
+  const { user } = useAuthStore()
 
   const [entryType, setEntryType] = useState('work') // 'work' | 'holiday'
   const [taskTitle, setTaskTitle] = useState(initialTaskTitle)
-  const [project, setProject] = useState(projects[0]?.name || 'TVA Core / Nexus')
+  const [project, setProject] = useState(projects[0]?.name || 'TMA Core / Nexus')
   const [description, setDescription] = useState('')
   const [startTime, setStartTime] = useState('09:00')
   const [endTime, setEndTime] = useState('17:00')
   const [breakMinutes, setBreakMinutes] = useState('30')
   const [date, setDate] = useState(dayjs().format('YYYY-MM-DD'))
   const [status, setStatus] = useState('Completed')
-  const [tagInput, setTagInput] = useState('Frontend, TVA')
+  const [tagInput, setTagInput] = useState('Frontend, TMA')
   const [isAiRewriting, setIsAiRewriting] = useState(false)
 
   useEffect(() => {
@@ -47,18 +49,18 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
     setEntryType(type)
     if (type === 'holiday') {
       if (!taskTitle || taskTitle.trim() === '') {
-        setTaskTitle('Official Public Holiday - Sacred Recess')
+        setTaskTitle('Official Public Holiday - Organization Recess')
       }
-      setProject('Sacred Recess')
+      setProject('Official Recess')
       setStatus('Holiday')
       setTagInput('Holiday, Recess')
     } else {
-      if (taskTitle === 'Official Public Holiday - Sacred Recess') {
+      if (taskTitle === 'Official Public Holiday - Organization Recess') {
         setTaskTitle('')
       }
-      setProject(projects[0]?.name || 'TVA Core / Nexus')
+      setProject(projects[0]?.name || 'TMA Core / Nexus')
       setStatus('Completed')
-      setTagInput('Frontend, TVA')
+      setTagInput('Frontend, TMA')
     }
   }
 
@@ -93,9 +95,9 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
 
     addEntry({
       date,
-      project: isHoliday ? 'Sacred Recess' : project,
+      project: isHoliday ? 'Official Recess' : project,
       taskTitle: taskTitle.trim(),
-      description: description.trim() || (isHoliday ? 'Official TVA Organization Holiday & Sacred Recess Day.' : ''),
+      description: description.trim() || (isHoliday ? 'Official TMA Organization Holiday & Recess Day.' : ''),
       status: isHoliday ? 'Holiday' : status,
       isHoliday,
       entryType,
@@ -103,10 +105,10 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
       endTime: isHoliday ? '23:59' : endTime,
       hours: computedHours,
       tags
-    })
+    }, user?.uid)
 
     playTvaSuccess()
-    toast.success(isHoliday ? 'Holiday / Sacred Recess logged!' : 'Journal entry logged successfully!')
+    toast.success(isHoliday ? 'Holiday / Recess logged!' : 'Journal entry logged successfully!')
     onClose()
   }
 
@@ -171,7 +173,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
                 type="text"
                 value={taskTitle}
                 onChange={(e) => setTaskTitle(e.target.value)}
-                placeholder={entryType === 'holiday' ? 'e.g. Official Public Holiday / PTO Recess' : 'e.g. Fixed bug in user login auth flow'}
+                placeholder={entryType === 'holiday' ? 'e.g. Official Public Holiday / Organization Recess' : 'e.g. Fixed bug in user login auth flow'}
                 className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg pl-3 pr-28 py-2.5 text-sm text-amber-200 placeholder-zinc-600 focus:outline-none transition-colors"
                 required
                 autoFocus
@@ -232,7 +234,7 @@ export function AddEntryModal({ isOpen, onClose, onOpenVoiceModal, initialTaskTi
                 className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none disabled:opacity-60"
               >
                 {entryType === 'holiday' ? (
-                  <option value="Sacred Recess">Sacred Recess (Holiday)</option>
+                  <option value="Official Recess">Official Recess (Holiday)</option>
                 ) : (
                   projects.map(p => (
                     <option key={p.id} value={p.name}>{p.name}</option>
