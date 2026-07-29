@@ -25,7 +25,7 @@ export function ProjectsPage() {
 
     setName('')
     setCode('')
-    toast.success('Project added to TVA Registry')
+    toast.success('Project added to TMA Registry')
   }
 
   return (
@@ -67,7 +67,7 @@ export function ProjectsPage() {
                     </div>
                     <button
                       onClick={() => { deleteProject(p.id); toast.success('Project deleted') }}
-                      className="text-zinc-600 hover:text-red-400 transition-colors"
+                      className="text-zinc-600 hover:text-red-400 transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -96,7 +96,7 @@ export function ProjectsPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Sacred Timeline Security"
+                placeholder="e.g. Master Project Security"
                 className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none"
                 required
               />
@@ -108,7 +108,7 @@ export function ProjectsPage() {
                 type="text"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
-                placeholder="e.g. STSEC"
+                placeholder="e.g. MPSEC"
                 className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none uppercase"
               />
             </div>
@@ -125,7 +125,7 @@ export function ProjectsPage() {
 
             <button
               type="submit"
-              className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+              className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(245,158,11,0.3)] cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span>Add to Registry</span>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { Download, ShieldCheck, X, FileText, CheckCircle2, Calendar, Filter } from 'lucide-react'
-import { MissMinutesLogo } from '../common/MissMinutesLogo'
+import { Download, ShieldCheck, X, FileText, CheckCircle2 } from 'lucide-react'
+import { MadameMinuteLogo } from '../common/MadameMinuteLogo'
 import { generatePDFReport } from '../../utils/pdfGenerator'
 import { toast } from 'sonner'
 import dayjs from 'dayjs'
@@ -51,13 +51,13 @@ export function PDFReportModal({ isOpen, onClose, entries, user }) {
   }))
 
   const handleDownloadPDF = async () => {
-    toast.info('Generating branded TVA PDF Report...')
+    toast.info('Generating branded TMA PDF Report...')
     const filename = reportType === 'single'
       ? `Madame_Minute_SingleDay_Report_${singleDate}.pdf`
       : `Madame_Minute_Range_Report_${startDate}_to_${endDate}.pdf`
 
     const success = await generatePDFReport({
-      elementId: 'tva-pdf-content',
+      elementId: 'tma-pdf-content',
       filename
     })
     if (success) {
@@ -76,7 +76,7 @@ export function PDFReportModal({ isOpen, onClose, entries, user }) {
           <div className="flex items-center gap-3">
             <FileText className="w-5 h-5 text-amber-500" />
             <div>
-              <h3 className="text-sm font-bold text-amber-400 uppercase">TVA REPORT GENERATOR</h3>
+              <h3 className="text-sm font-bold text-amber-400 uppercase">TMA REPORT GENERATOR</h3>
               <p className="text-xs text-zinc-400">Configure single-day deep-dive or multi-day range summary.</p>
             </div>
           </div>
@@ -145,20 +145,20 @@ export function PDFReportModal({ isOpen, onClose, entries, user }) {
 
         {/* PDF Printable Area with Explicit Standard Colors */}
         <div 
-          id="tva-pdf-content" 
+          id="tma-pdf-content" 
           style={{ backgroundColor: '#141414', color: '#E4E4E7', borderColor: '#F59E0B' }}
           className="border rounded-xl p-8 space-y-6 relative overflow-hidden"
         >
-          {/* TVA Official Watermark Stamp */}
+          {/* TMA Official Watermark Stamp */}
           <div className="absolute top-12 right-12 opacity-15 pointer-events-none transform rotate-12 flex flex-col items-center">
             <ShieldCheck className="w-32 h-32 text-amber-500" style={{ color: '#F59E0B' }} />
-            <span className="text-xs font-bold tracking-widest mt-1" style={{ color: '#F59E0B' }}>APPROVED BY TVA</span>
+            <span className="text-xs font-bold tracking-widest mt-1" style={{ color: '#F59E0B' }}>APPROVED BY TMA</span>
           </div>
 
           {/* Report Header */}
           <div className="flex items-start justify-between border-b pb-6" style={{ borderColor: '#F59E0B' }}>
             <div className="flex items-center gap-4">
-              <MissMinutesLogo size={56} />
+              <MadameMinuteLogo size={56} />
               <div>
                 <h1 className="text-2xl font-black tracking-wider" style={{ color: '#F59E0B' }}>MADAME MINUTE</h1>
                 <p className="text-xs font-bold" style={{ color: '#FFB84D' }}>
@@ -168,9 +168,9 @@ export function PDFReportModal({ isOpen, onClose, entries, user }) {
               </div>
             </div>
             <div className="text-right text-xs space-y-0.5" style={{ color: '#A1A1AA' }}>
-              <div><strong style={{ color: '#F59E0B' }}>Agent:</strong> {user?.displayName || 'Agent Mobius'}</div>
-              <div><strong style={{ color: '#F59E0B' }}>Role:</strong> {user?.role || 'Senior Temporal Analyst'}</div>
-              <div><strong style={{ color: '#F59E0B' }}>Email:</strong> {user?.email || 'agent.mobius@tva.gov'}</div>
+              <div><strong style={{ color: '#F59E0B' }}>Agent:</strong> {user?.displayName || 'Agent User'}</div>
+              <div><strong style={{ color: '#F59E0B' }}>Role:</strong> {user?.role || 'Senior Task Analyst'}</div>
+              <div><strong style={{ color: '#F59E0B' }}>Email:</strong> {user?.email || 'agent@tma.org'}</div>
             </div>
           </div>
 
@@ -187,9 +187,9 @@ export function PDFReportModal({ isOpen, onClose, entries, user }) {
               <strong className="text-2xl font-extrabold" style={{ color: '#22C55E' }}>{filteredEntries.length} Tasks</strong>
             </div>
             <div className="p-4 rounded-lg text-center border" style={{ backgroundColor: '#1E1E1E', borderColor: '#2E2E2E' }}>
-              <span className="text-[10px] uppercase block" style={{ color: '#A1A1AA' }}>TVA CLEARANCE</span>
+              <span className="text-[10px] uppercase block" style={{ color: '#A1A1AA' }}>TMA CLEARANCE</span>
               <strong className="text-sm font-bold flex items-center justify-center gap-1 mt-1" style={{ color: '#F59E0B' }}>
-                <CheckCircle2 className="w-4 h-4" /> VERIFIED SACRED
+                <CheckCircle2 className="w-4 h-4" /> VERIFIED APPROVED
               </strong>
             </div>
           </div>
@@ -280,7 +280,7 @@ export function PDFReportModal({ isOpen, onClose, entries, user }) {
           {/* Report Footer */}
           <div className="border-t pt-4 flex items-center justify-between text-[10px]" style={{ borderColor: '#2E2E2E', color: '#71717A' }}>
             <span>GENERATED AUTOMATICALLY BY MADAME MINUTE ENGINE</span>
-            <span>CONFIDENTIAL • TVA INTERNAL ENTERPRISE</span>
+            <span>CONFIDENTIAL • TMA INTERNAL ENTERPRISE</span>
           </div>
         </div>
       </div>

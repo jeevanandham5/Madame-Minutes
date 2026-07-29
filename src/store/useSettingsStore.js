@@ -4,7 +4,7 @@ import { persist } from 'zustand/middleware'
 export const THEME_PALETTES = {
   amber: {
     id: 'amber',
-    name: 'Sacred Amber (TVA Classic)',
+    name: 'Sacred Amber (TMA Classic)',
     hex: '#F59E0B',
     hover: '#D97706',
     rgb: '245, 158, 11'
@@ -74,7 +74,8 @@ export const useSettingsStore = create(
       soundEnabled: true,
       tickingEnabled: true,
       timeFormat: '24h',
-      companyName: 'Time Variance Authority',
+      companyName: 'Task Management Association',
+
       dailyTargetHours: 8.0,
       themeColor: 'amber', // 'amber' | 'green' | 'cyan' | 'purple' | 'red' | 'custom'
       customAccentHex: '#22C55E',

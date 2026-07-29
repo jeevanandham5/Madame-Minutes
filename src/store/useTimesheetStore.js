@@ -2,14 +2,13 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import dayjs from 'dayjs'
 import { firestoreService } from '../firebase/firestoreService'
-import { calculateStreak } from '../utils/dateUtils'
 
 const INITIAL_ENTRIES = [
   {
-    id: 'tva-entry-1',
+    id: 'tma-entry-1',
     date: dayjs().format('YYYY-MM-DD'),
-    project: 'TVA Core / Nexus',
-    taskTitle: 'Sacred Timeline Monotonic Sync',
+    project: 'TMA Core / Nexus',
+    taskTitle: 'Master Timeline Monotonic Sync',
     description: 'Resolved timeline deviation anomalies in Sector 63. Calibrated temporal sensors and logged branch variances.',
     status: 'Completed',
     startTime: '09:00',
@@ -19,11 +18,10 @@ const INITIAL_ENTRIES = [
     createdAt: new Date().toISOString()
   },
   {
-    id: 'tva-entry-2',
+    id: 'tma-entry-2',
     date: dayjs().format('YYYY-MM-DD'),
     project: 'Madame Minute AI',
     taskTitle: 'Voice Prompt Calibration & Speech Synthesis',
-
     description: 'Updated acoustic neural weights for Madame Minute retro speech synthesizer. Optimized warning notifications.',
     status: 'In Progress',
     startTime: '13:30',
@@ -33,11 +31,11 @@ const INITIAL_ENTRIES = [
     createdAt: new Date().toISOString()
   },
   {
-    id: 'tva-entry-3',
+    id: 'tma-entry-3',
     date: dayjs().subtract(1, 'day').format('YYYY-MM-DD'),
     project: 'Chrono Dashboard',
     taskTitle: 'CRT Monitor Scanline Shader Optimization',
-    description: 'Refactored CSS webgl scanline filters to decrease GPU power drain on vintage TVA terminal workstations.',
+    description: 'Refactored CSS webgl scanline filters to decrease GPU power drain on vintage terminal workstations.',
     status: 'Completed',
     startTime: '10:00',
     endTime: '16:00',
@@ -46,10 +44,10 @@ const INITIAL_ENTRIES = [
     createdAt: new Date().toISOString()
   },
   {
-    id: 'tva-entry-4',
+    id: 'tma-entry-4',
     date: dayjs().subtract(2, 'day').format('YYYY-MM-DD'),
     project: 'Vault-Tec Protocol',
-    taskTitle: 'Temporal Security Clearance Audit',
+    taskTitle: 'Security Clearance Audit',
     description: 'Audited Level 4 access logs across all variant record archives. Verified zero unauthorized timeline overwrites.',
     status: 'Completed',
     startTime: '08:30',
@@ -59,11 +57,11 @@ const INITIAL_ENTRIES = [
     createdAt: new Date().toISOString()
   },
   {
-    id: 'tva-entry-holiday-1',
+    id: 'tma-entry-holiday-1',
     date: dayjs().subtract(3, 'day').format('YYYY-MM-DD'),
-    project: 'Sacred Recess',
-    taskTitle: 'Official Public Holiday - Sacred Timeline Recess',
-    description: 'TVA Official Organization Holiday. All variant temporal logs paused for Sacred Recess celebration.',
+    project: 'Official Recess',
+    taskTitle: 'Official Public Holiday - Organization Recess',
+    description: 'TMA Official Organization Holiday. All variant temporal logs paused for Official Recess celebration.',
     status: 'Holiday',
     isHoliday: true,
     entryType: 'holiday',
@@ -75,7 +73,6 @@ const INITIAL_ENTRIES = [
   }
 ]
 
-
 export const useTimesheetStore = create(
   persist(
     (set, get) => ({
@@ -84,7 +81,7 @@ export const useTimesheetStore = create(
         isRunning: false,
         elapsedSeconds: 0,
         taskTitle: '',
-        project: 'TVA Core / Nexus',
+        project: 'TMA Core / Nexus',
         startTime: null
       },
       searchQuery: '',
@@ -97,7 +94,7 @@ export const useTimesheetStore = create(
       setSelectedStatusFilter: (status) => set({ selectedStatusFilter: status }),
 
       addEntry: async (newEntry, userId = null) => {
-        const id = 'tva-entry-' + Date.now()
+        const id = 'tma-entry-' + Date.now()
         const entryToAdd = {
           id,
           date: dayjs().format('YYYY-MM-DD'),
@@ -152,7 +149,7 @@ export const useTimesheetStore = create(
 
         const clonedEntries = yesterdayEntries.map(e => ({
           ...e,
-          id: 'tva-entry-' + Math.random().toString(36).substr(2, 9),
+          id: 'tma-entry-' + Math.random().toString(36).substr(2, 9),
           date: todayStr,
           status: 'Completed',
           createdAt: new Date().toISOString()
@@ -163,7 +160,7 @@ export const useTimesheetStore = create(
       },
 
       // Timer control
-      startTimer: (taskTitle = '', project = 'TVA Core / Nexus') => set(state => ({
+      startTimer: (taskTitle = '', project = 'TMA Core / Nexus') => set(state => ({
         activeTimer: {
           ...state.activeTimer,
           isRunning: true,
@@ -191,7 +188,7 @@ export const useTimesheetStore = create(
         const { activeTimer } = get()
         if (activeTimer.elapsedSeconds < 10) {
           set({
-            activeTimer: { isRunning: false, elapsedSeconds: 0, taskTitle: '', project: 'TVA Core / Nexus', startTime: null }
+            activeTimer: { isRunning: false, elapsedSeconds: 0, taskTitle: '', project: 'TMA Core / Nexus', startTime: null }
           })
           return null
         }
@@ -201,11 +198,11 @@ export const useTimesheetStore = create(
         const start = activeTimer.startTime ? dayjs(activeTimer.startTime).format('HH:mm') : '09:00'
 
         const newEntry = {
-          id: 'tva-entry-' + Date.now(),
+          id: 'tma-entry-' + Date.now(),
           date: dayjs().format('YYYY-MM-DD'),
-          project: activeTimer.project || 'TVA Core / Nexus',
+          project: activeTimer.project || 'TMA Core / Nexus',
           taskTitle: activeTimer.taskTitle || 'Logged Session',
-          description: `Logged via Madame Minute Live TVA Timer (${Math.floor(activeTimer.elapsedSeconds / 60)} minutes tracked)`,
+          description: `Logged via Madame Minute Live Timer (${Math.floor(activeTimer.elapsedSeconds / 60)} minutes tracked)`,
           status: 'Completed',
           startTime: start,
           endTime: now,
@@ -216,7 +213,7 @@ export const useTimesheetStore = create(
 
         get().addEntry(newEntry, userId)
         set({
-          activeTimer: { isRunning: false, elapsedSeconds: 0, taskTitle: '', project: 'TVA Core / Nexus', startTime: null }
+          activeTimer: { isRunning: false, elapsedSeconds: 0, taskTitle: '', project: 'TMA Core / Nexus', startTime: null }
         })
         return newEntry
       }

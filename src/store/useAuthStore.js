@@ -15,14 +15,14 @@ export const useAuthStore = create((set) => ({
 
   initAuthListener: () => {
     if (!isFirebaseConfigured || !auth) {
-      // Offline / Fallback Guest TVA Agent User
+      // Offline / Fallback Guest TMA Agent User
       set({
         user: {
-          uid: 'tva-agent-007',
-          email: 'agent.mobius@tva.gov',
-          displayName: 'Agent Mobius',
+          uid: 'tma-agent-007',
+          email: 'agent@tma.org',
+          displayName: 'Agent User',
           photoURL: null,
-          role: 'Senior Temporal Analyst',
+          role: 'Senior Task Analyst',
           isGuest: true
         },
         isAuthLoading: false
@@ -38,18 +38,18 @@ export const useAuthStore = create((set) => ({
             email: currentUser.email,
             displayName: currentUser.displayName || currentUser.email.split('@')[0],
             photoURL: currentUser.photoURL,
-            role: 'TVA Agent'
+            role: 'TMA Agent'
           },
           isAuthLoading: false
         })
       } else {
         set({
           user: {
-            uid: 'tva-agent-007',
-            email: 'agent.mobius@tva.gov',
-            displayName: 'Agent Mobius',
+            uid: 'tma-agent-007',
+            email: 'agent@tma.org',
+            displayName: 'Agent User',
             photoURL: null,
-            role: 'Senior Temporal Analyst',
+            role: 'Senior Task Analyst',
             isGuest: true
           },
           isAuthLoading: false
@@ -96,11 +96,11 @@ export const useAuthStore = create((set) => ({
     }
     set({
       user: {
-        uid: 'tva-agent-guest',
-        email: 'guest@tva.gov',
-        displayName: 'Guest Variant',
+        uid: 'tma-agent-guest',
+        email: 'guest@tma.org',
+        displayName: 'Guest Agent',
         photoURL: null,
-        role: 'Guest Variant',
+        role: 'Guest Agent',
         isGuest: true
       }
     })

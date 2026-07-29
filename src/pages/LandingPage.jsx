@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { 
-  Sparkles, Clock, Zap, Shield, FileText, Mic, CheckCircle2, ArrowRight, Play, Flame, Layers, Lock, Cpu, Terminal, RefreshCw, Check
+  Sparkles, Clock, Zap, Shield, FileText, Mic, ArrowRight, Play, Flame, Lock, Terminal 
 } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { MissMinutesLogo } from '../components/common/MissMinutesLogo'
+import { MadameMinuteLogo } from '../components/common/MadameMinuteLogo'
 import { ScanlineOverlay } from '../components/common/ScanlineOverlay'
 import { HyperText } from '../components/common/HyperText'
 import { useAuthStore } from '../store/useAuthStore'
@@ -23,7 +23,7 @@ export function LandingPage({ onEnterApp }) {
   const handleRunAiDemo = () => {
     setIsRewritingDemo(true)
     setTimeout(() => {
-      setAiDemoResult('Resolved critical authentication anomaly in TVA User Onboarding flow: conducted root-cause analysis, applied structural fix, and validated end-to-end security clearance.')
+      setAiDemoResult('Resolved critical authentication anomaly in TMA User Onboarding flow: conducted root-cause analysis, applied structural fix, and validated end-to-end security clearance.')
       setIsRewritingDemo(false)
       toast.success('AI Enhanced Task Note!')
     }, 500)
@@ -38,7 +38,7 @@ export function LandingPage({ onEnterApp }) {
       : await registerWithEmail(email, password)
 
     if (res.success) {
-      toast.success(isLogin ? 'Welcome back to TVA Vault!' : 'TVA Credentials Issued!')
+      toast.success(isLogin ? 'Welcome back to Madame Minute Vault!' : 'TMA Credentials Issued!')
       setShowAuthModal(false)
       onEnterApp()
     } else {
@@ -66,12 +66,12 @@ export function LandingPage({ onEnterApp }) {
       {/* Top Navigation */}
       <nav className="max-w-7xl mx-auto px-6 py-6 flex items-center justify-between relative z-10 border-b border-zinc-800/80">
         <div className="flex items-center gap-3">
-          <MissMinutesLogo size={48} />
+          <MadameMinuteLogo size={48} />
           <div>
             <span className="text-xl font-black text-amber-500 tracking-wider block leading-none">
               <HyperText text="MADAME MINUTE" />
             </span>
-            <span className="text-[10px] text-zinc-500 tracking-widest font-bold">EVERY MINUTE MATTERS • TVA ENTERPRISE</span>
+            <span className="text-[10px] text-zinc-500 tracking-widest font-bold">EVERY MINUTE MATTERS • TASK MANAGEMENT ASSOCIATION</span>
           </div>
         </div>
 
@@ -86,7 +86,7 @@ export function LandingPage({ onEnterApp }) {
             onClick={onEnterApp}
             className="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs rounded-xl shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center gap-2 cursor-pointer"
           >
-            <span>Enter TVA Command Center</span>
+            <span>Enter TMA Command Center</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>
@@ -100,11 +100,11 @@ export function LandingPage({ onEnterApp }) {
           className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold shadow-[0_0_15px_rgba(245,158,11,0.2)]"
         >
           <Sparkles className="w-3.5 h-3.5" />
-          <span>TVA TIME VARIANCE AUTHORITY ENTERPRISE PLATFORM</span>
+          <span>TASK MANAGEMENT ASSOCIATION ENTERPRISE PLATFORM</span>
         </motion.div>
 
         <h1 className="text-4xl sm:text-6xl font-black text-amber-500 tracking-tight leading-tight uppercase drop-shadow-[0_0_30px_rgba(245,158,11,0.4)]">
-          <HyperText text="Master Your Sacred Timeline." /><br />
+          <HyperText text="Master Your Work Timeline." /><br />
           <span className="text-zinc-100"><HyperText text="Replace Excel Forever." delay={400} /></span>
         </h1>
 
@@ -138,7 +138,7 @@ export function LandingPage({ onEnterApp }) {
               <Terminal className="w-4 h-4 text-amber-500" />
               <span className="text-xs font-bold text-amber-500 uppercase">TRY LIVE AI DESCRIPTION REWRITE ENGINE</span>
             </div>
-            <span className="text-[10px] text-zinc-500 uppercase">INTERACTIVE TVA PREVIEW</span>
+            <span className="text-[10px] text-zinc-500 uppercase">INTERACTIVE PREVIEW</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
@@ -156,12 +156,12 @@ export function LandingPage({ onEnterApp }) {
                 className="w-full py-2 bg-orange-500/20 border border-orange-500/40 text-orange-400 hover:bg-orange-500 hover:text-black font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>{isRewritingDemo ? 'Enhancing with TVA LLM...' : 'Transform Note to Executive Log'}</span>
+                <span>{isRewritingDemo ? 'Enhancing note...' : 'Transform Note to Executive Log'}</span>
               </button>
             </div>
 
             <div className="md:col-span-7 p-4 bg-[#141414] border border-amber-500/30 rounded-xl">
-              <span className="text-[10px] text-zinc-500 uppercase block mb-1">ENHANCED TVA EXECUTIVE DESCRIPTION:</span>
+              <span className="text-[10px] text-zinc-500 uppercase block mb-1">ENHANCED EXECUTIVE DESCRIPTION:</span>
               <p className="text-xs text-amber-300 font-sans leading-relaxed">{aiDemoResult}</p>
             </div>
           </div>
@@ -193,13 +193,13 @@ export function LandingPage({ onEnterApp }) {
           <ElaborateFeatureCard
             icon={Mic}
             title="Voice Journal Dictation"
-            description="Hands-free work journaling using the native Web Speech API with retro soundwave audio indicators."
+            description="Hands-free work journaling using native Web Speech API with audio indicators."
             badge="SPEECH RECOGNITION"
           />
           <ElaborateFeatureCard
             icon={FileText}
             title="Executive PDF Reports"
-            description="Generate branded PDF reports with single-day or multi-day date ranges and official TVA approval stamps."
+            description="Generate branded PDF reports with single-day or multi-day date ranges and official approval stamps."
             badge="EXECUTIVE PDF"
           />
           <ElaborateFeatureCard
@@ -229,9 +229,9 @@ export function LandingPage({ onEnterApp }) {
             </button>
 
             <div className="flex items-center gap-3 mb-6">
-              <MissMinutesLogo size={42} />
+              <MadameMinuteLogo size={42} />
               <div>
-                <h3 className="text-base font-bold text-amber-400 uppercase">TVA ACCESS PORTAL</h3>
+                <h3 className="text-base font-bold text-amber-400 uppercase">TMA ACCESS PORTAL</h3>
                 <p className="text-xs text-zinc-400">{isLogin ? 'Sign in to access your journal' : 'Register new agent account'}</p>
               </div>
             </div>
@@ -243,7 +243,7 @@ export function LandingPage({ onEnterApp }) {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="agent@tva.gov"
+                  placeholder="agent@tma.org"
                   className="w-full bg-[#141414] border border-zinc-800 focus:border-amber-500 rounded-lg px-3 py-2 text-xs text-amber-300 focus:outline-none"
                   required
                 />

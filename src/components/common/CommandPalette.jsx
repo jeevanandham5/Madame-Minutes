@@ -93,21 +93,28 @@ export function CommandPalette({ isOpen, onClose, onNavigate, onOpenAddModal, on
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-16 bg-black/85 backdrop-blur-md animate-fade-in p-4 font-mono">
       <div className="w-full max-w-2xl bg-[#1E1E1E] border border-amber-500/50 rounded-2xl shadow-[0_0_40px_rgba(245,158,11,0.25)] overflow-hidden">
-        {/* Search Header Input */}
-        <div className="flex items-center gap-3 px-4 py-3.5 border-b border-zinc-800 bg-[#141414]">
-          <Search className="w-5 h-5 text-amber-500 animate-pulse" />
+        {/* Search Header */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800">
+          <Search className="w-4 h-4 text-amber-500" />
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search dates (e.g. 2026-07-28), tasks, projects, notes (Cmd + K)..."
-            className="flex-1 bg-transparent text-amber-300 placeholder-zinc-500 focus:outline-none text-sm font-semibold"
+            placeholder="Type a command or search logs, projects, dates..."
+            className="w-full bg-transparent text-sm text-amber-200 placeholder-zinc-500 focus:outline-none"
             autoFocus
           />
-          <kbd className="px-2 py-0.5 text-[10px] bg-zinc-800 text-amber-400 border border-zinc-700 rounded">ESC</kbd>
+          <span className="px-1.5 py-0.5 text-[10px] bg-zinc-800 text-amber-400 border border-zinc-700 rounded uppercase font-bold">
+            ESC
+          </span>
           <button onClick={onClose} className="text-zinc-500 hover:text-amber-500 transition-colors cursor-pointer">
             <X className="w-5 h-5" />
           </button>
+        </div>
+
+        {/* Command Category Header */}
+        <div className="text-[10px] text-amber-500 font-extrabold tracking-widest uppercase px-4 pt-3 pb-1">
+          TMA COMMAND PALETTE
         </div>
 
         {/* Command Body */}

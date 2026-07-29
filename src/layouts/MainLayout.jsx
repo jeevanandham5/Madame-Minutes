@@ -15,6 +15,7 @@ export function MainLayout({ activeNav, onNavigate, onNavigateLanding, children 
   const [showAddModal, setShowAddModal] = useState(false)
   const [showVoiceModal, setShowVoiceModal] = useState(false)
   const [showPDFModal, setShowPDFModal] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [presetTaskTitle, setPresetTaskTitle] = useState('')
 
   const { entries } = useTimesheetStore()
@@ -31,23 +32,23 @@ export function MainLayout({ activeNav, onNavigate, onNavigateLanding, children 
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
-
   return (
     <div className="flex h-screen bg-[#141414] text-zinc-200 overflow-hidden relative font-mono">
       {/* CRT Scanline Shader */}
       <ScanlineOverlay />
 
-      {/* TVA Sidebar Navigation */}
+      {/* TVA Sidebar Navigation (Desktop + Mobile Drawer) */}
       <Sidebar 
         activeNav={activeNav} 
         onNavigate={onNavigate} 
         onNavigateLanding={onNavigateLanding}
+        isMobileOpen={isMobileMenuOpen}
+        onCloseMobile={() => setIsMobileMenuOpen(false)}
         onOpenAddModal={() => {
           setPresetTaskTitle('')
           setShowAddModal(true)
         }}
       />
-
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative z-10">
@@ -55,6 +56,7 @@ export function MainLayout({ activeNav, onNavigate, onNavigateLanding, children 
           activeNav={activeNav}
           onNavigate={onNavigate}
           onOpenCommandPalette={() => setShowCmdPalette(true)}
+          onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
           onOpenAddModal={() => {
             setPresetTaskTitle('')
             setShowAddModal(true)
@@ -62,10 +64,9 @@ export function MainLayout({ activeNav, onNavigate, onNavigateLanding, children 
           onNavigateLanding={onNavigateLanding}
         />
 
-
         <ChronoHeaderBar />
 
-        <main className="flex-1 overflow-y-auto p-6 space-y-6">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
           {children}
         </main>
       </div>
@@ -104,7 +105,6 @@ export function MainLayout({ activeNav, onNavigate, onNavigateLanding, children 
           setShowAddModal(true)
         }}
       />
-
 
       <PDFReportModal
         isOpen={showPDFModal}

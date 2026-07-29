@@ -112,10 +112,11 @@ export function VoiceInputModal({ isOpen, onClose, onApplyText }) {
             <Mic className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-amber-400">TVA Voice Journaling</h3>
+            <h3 className="text-lg font-bold text-amber-400">Madame Minute Voice Journaling</h3>
             <p className="text-xs text-zinc-400">Speak continuous paragraphs to transcribe into timesheet format.</p>
           </div>
         </div>
+
 
         {/* Retro Mic Soundwave Visualizer */}
         <div className="flex flex-col items-center justify-center p-6 bg-[#141414] border border-zinc-800 rounded-xl my-4 text-center">
