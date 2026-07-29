@@ -55,11 +55,11 @@ export function DashboardPage({ onOpenAddModal }) {
         {/* Prominent 1-Click Main Screen LOG TIME ENTRY Button */}
         <div className="pt-2 flex items-center justify-center">
           <button
-            onClick={onOpenAddModal}
-            className="px-8 py-3.5 bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs sm:text-sm rounded-xl shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all transform hover:scale-105 flex items-center gap-2.5 cursor-pointer uppercase tracking-wider"
+            onClick={() => onOpenAddModal && onOpenAddModal()}
+            className="px-8 py-3.5 bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-xs sm:text-sm rounded-xl shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all transform hover:scale-105 flex items-center gap-2 cursor-pointer uppercase tracking-wider"
           >
             <Plus className="w-5 h-5 stroke-[3]" />
-            <span>+ LOG TIME ENTRY</span>
+            <span>LOG TIME ENTRY</span>
           </button>
         </div>
       </div>

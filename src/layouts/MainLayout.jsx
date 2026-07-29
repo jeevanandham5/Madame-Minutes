@@ -32,22 +32,24 @@ export function MainLayout({ activeNav, onNavigate, onNavigateLanding, children 
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  const handleOpenAddModal = (title = '') => {
+    setPresetTaskTitle(title)
+    setShowAddModal(true)
+  }
+
   return (
     <div className="flex h-screen bg-[#141414] text-zinc-200 overflow-hidden relative font-mono">
       {/* CRT Scanline Shader */}
       <ScanlineOverlay />
 
-      {/* TVA Sidebar Navigation (Desktop + Mobile Drawer) */}
+      {/* TMA Sidebar Navigation (Desktop + Mobile Drawer) */}
       <Sidebar 
         activeNav={activeNav} 
         onNavigate={onNavigate} 
         onNavigateLanding={onNavigateLanding}
         isMobileOpen={isMobileMenuOpen}
         onCloseMobile={() => setIsMobileMenuOpen(false)}
-        onOpenAddModal={() => {
-          setPresetTaskTitle('')
-          setShowAddModal(true)
-        }}
+        onOpenAddModal={() => handleOpenAddModal()}
       />
 
       {/* Main Content Area */}
@@ -57,17 +59,14 @@ export function MainLayout({ activeNav, onNavigate, onNavigateLanding, children 
           onNavigate={onNavigate}
           onOpenCommandPalette={() => setShowCmdPalette(true)}
           onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
-          onOpenAddModal={() => {
-            setPresetTaskTitle('')
-            setShowAddModal(true)
-          }}
+          onOpenAddModal={() => handleOpenAddModal()}
           onNavigateLanding={onNavigateLanding}
         />
 
         <ChronoHeaderBar />
 
         <main className="flex-1 overflow-y-auto p-3 sm:p-6 space-y-4 sm:space-y-6">
-          {children}
+          {typeof children === 'function' ? children(handleOpenAddModal) : children}
         </main>
       </div>
 
@@ -76,10 +75,7 @@ export function MainLayout({ activeNav, onNavigate, onNavigateLanding, children 
         isOpen={showCmdPalette}
         onClose={() => setShowCmdPalette(false)}
         onNavigate={onNavigate}
-        onOpenAddModal={() => {
-          setPresetTaskTitle('')
-          setShowAddModal(true)
-        }}
+        onOpenAddModal={() => handleOpenAddModal()}
         onExportPDF={() => setShowPDFModal(true)}
       />
 

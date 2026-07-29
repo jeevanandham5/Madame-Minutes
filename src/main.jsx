@@ -16,7 +16,6 @@ import { useSettingsStore } from './store/useSettingsStore'
 import { initGlobalTvaSoundListener } from './utils/tvaAudio'
 import './styles.css'
 
-
 function App() {
   const { user, initAuthListener } = useAuthStore()
   const { initTheme } = useSettingsStore()
@@ -32,14 +31,11 @@ function App() {
     }
   }, [initAuthListener, initTheme])
 
-
   useEffect(() => {
     if (user && !user.isGuest) {
       setViewMode('app')
     }
   }, [user])
-
-
 
   if (viewMode === 'landing') {
     return (
@@ -50,14 +46,14 @@ function App() {
     )
   }
 
-  const renderActivePage = () => {
+  const renderActivePage = (onOpenAddModal) => {
     switch (activeNav) {
       case 'Dashboard':
-        return <DashboardPage onOpenAddModal={() => {}} />
+        return <DashboardPage onOpenAddModal={onOpenAddModal} />
       case 'Timesheet':
-        return <TimesheetPage onOpenAddModal={() => {}} />
+        return <TimesheetPage onOpenAddModal={onOpenAddModal} />
       case 'Timeline':
-        return <TimelinePage onOpenAddModal={() => {}} />
+        return <TimelinePage onOpenAddModal={onOpenAddModal} />
       case 'Calendar':
         return <CalendarPage />
       case 'Projects':
@@ -69,7 +65,7 @@ function App() {
       case 'Settings':
         return <SettingsPage />
       default:
-        return <DashboardPage onOpenAddModal={() => {}} />
+        return <DashboardPage onOpenAddModal={onOpenAddModal} />
     }
   }
 
@@ -81,7 +77,7 @@ function App() {
         onNavigate={(nav) => setActiveNav(nav)}
         onNavigateLanding={() => setViewMode('landing')}
       >
-        {renderActivePage()}
+        {(onOpenAddModal) => renderActivePage(onOpenAddModal)}
       </MainLayout>
     </>
   )
