@@ -15,7 +15,7 @@ function getAudioContext() {
     }
   }
   if (audioCtx && audioCtx.state === 'suspended') {
-    audioCtx.resume()
+    audioCtx.resume().catch(() => {})
   }
   return audioCtx
 }
@@ -184,6 +184,13 @@ export function initGlobalTvaSoundListener() {
   if (typeof window === 'undefined') return
 
   const handleGlobalClick = (event) => {
+    // Unlock Web Audio API context on first user gesture
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume().catch(() => {})
+    } else if (!audioCtx) {
+      getAudioContext()
+    }
+
     const target = event.target
     if (!target) return
 
@@ -194,4 +201,5 @@ export function initGlobalTvaSoundListener() {
   }
 
   window.addEventListener('click', handleGlobalClick, { capture: true })
+  window.addEventListener('keydown', handleGlobalClick, { capture: true })
 }

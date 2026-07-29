@@ -11,15 +11,21 @@ import { ProjectsPage } from './pages/ProjectsPage'
 import { ReportsPage } from './pages/ReportsPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { SettingsPage } from './pages/SettingsPage'
+import { MadameMinuteLogo } from './components/common/MadameMinuteLogo'
+import { ScanlineOverlay } from './components/common/ScanlineOverlay'
 import { useAuthStore } from './store/useAuthStore'
 import { useSettingsStore } from './store/useSettingsStore'
+import { useTimesheetStore } from './store/useTimesheetStore'
 import { initGlobalTvaSoundListener } from './utils/tvaAudio'
 import './styles.css'
 
 function App() {
-  const { user, initAuthListener } = useAuthStore()
+  const { user, isAuthLoading, initAuthListener } = useAuthStore()
   const { initTheme } = useSettingsStore()
-  const [viewMode, setViewMode] = useState(user && !user.isGuest ? 'app' : 'landing')
+  const { syncFirestoreEntries } = useTimesheetStore()
+  
+  // State for viewMode: 'loading' | 'app' | 'landing'
+  const [viewMode, setViewMode] = useState('loading')
   const [activeNav, setActiveNav] = useState('Dashboard')
 
   useEffect(() => {
@@ -32,10 +38,35 @@ function App() {
   }, [initAuthListener, initTheme])
 
   useEffect(() => {
-    if (user && !user.isGuest) {
-      setViewMode('app')
+    if (!isAuthLoading) {
+      if (user && !user.isGuest) {
+        setViewMode('app')
+        if (user.uid) {
+          syncFirestoreEntries(user.uid)
+        }
+      } else {
+        setViewMode('landing')
+      }
     }
-  }, [user])
+  }, [user, isAuthLoading, syncFirestoreEntries])
+
+  // Loading Screen while Firebase Auth restores session from local storage / cookies
+  if (isAuthLoading || viewMode === 'loading') {
+    return (
+      <div className="h-screen w-screen bg-[#141414] text-amber-500 font-mono flex flex-col items-center justify-center relative overflow-hidden select-none">
+        <ScanlineOverlay />
+        <div className="relative z-10 flex flex-col items-center gap-4 text-center p-6">
+          <MadameMinuteLogo size={64} />
+          <div>
+            <h2 className="text-xl font-black tracking-widest text-amber-400 uppercase animate-pulse">
+              MADAME MINUTE VAULT
+            </h2>
+            <p className="text-xs text-zinc-500 font-bold mt-1">INITIALIZING SECURITY CLEARANCE...</p>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (viewMode === 'landing') {
     return (
